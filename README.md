@@ -55,7 +55,7 @@ apt install intel-opencl-icd
 
 CMake (`3.16.3-1ubuntu1`) found none.
 
-```Shell
+```
 -- Looking for CL_VERSION_2_2
 -- Looking for CL_VERSION_2_2 - not found
 -- Looking for CL_VERSION_2_1
@@ -78,7 +78,7 @@ apt install opencl-c-headers
 
 CMake does better, but still unresolved.
 
-```Shell
+```
 -- Looking for CL_VERSION_2_2
 -- Looking for CL_VERSION_2_2 - found
 CMake Error at /usr/share/cmake-3.16/Modules/FindPackageHandleStandardArgs.cmake:146 (message):
@@ -125,7 +125,7 @@ ln -s libOpenCL.so.1 libOpenCL.so
 
 Now CMake finds it.
 
-```Shell
+```
 -- Looking for CL_VERSION_2_2
 -- Looking for CL_VERSION_2_2 - found
 -- Found OpenCL: /usr/lib/x86_64-linux-gnu/libOpenCL.so (found version "2.2") 
