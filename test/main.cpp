@@ -1,7 +1,8 @@
 #include "../platform/d_ocl_platform.h"
 #include <iostream>
 
-int main(int argc, char** argv)
+
+auto main(int argc, char** argv) -> int
 {
     int retval = 0;
 
