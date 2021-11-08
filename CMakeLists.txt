@@ -12,24 +12,8 @@ endif()
 # opencl will use highest available if not specified
 add_compile_definitions(CL_TARGET_OPENCL_VERSION=200)
 
+include("base/clang-tidy.cmake")
 include("base/clang-format.cmake")
-
-find_file(CLANG_TIDY_PATH
-    clang-tidy
-)
-if (EXISTS "${CLANG_TIDY_PATH}")
-    # use .clang-tidy
-    set(CMAKE_CXX_CLANG_TIDY clang-tidy)
-
-    set(CLANG_TIDY_CMD_FILE "compile_commands.json")
-    # TODO: don't know why file(CREATE_LINK SYMBOLIC) doesn't work
-    file(COPY
-        "${CMAKE_BINARY_DIR}/${CLANG_TIDY_CMD_FILE}"
-        DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}"
-    )
-else()
-    message("linting disabled")
-endif()
 
 include_directories(${OpenCL_INCLUDE_DIRS})
 add_subdirectory(platform)
