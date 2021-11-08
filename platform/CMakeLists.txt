@@ -13,7 +13,4 @@ target_compile_definitions(DOclPlatform
     PRIVATE EXPORT_D_OCL_PLATFORM
 )
 
-list(TRANSFORM D_OCL_FILES
-    PREPEND "${CMAKE_CURRENT_LIST_DIR}/"
-)
 post_build_clang_format(DOclPlatform ${D_OCL_FILES})
