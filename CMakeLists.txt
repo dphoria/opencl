@@ -6,11 +6,20 @@ project(LearnOpenCL C CXX)
 set(OpenCL_ROOT /usr/lib/x86_64-linux-gnu/)
 find_package(OpenCL REQUIRED)
 
+if (${OpenCL_VERSION_MAJOR} LESS 2)
+    message(FATAL_ERROR "requires OpenCL 2+")
+endif()
+# opencl will use highest available if not specified
+add_compile_definitions(CL_TARGET_OPENCL_VERSION=200)
+
+include("base/clang-format.cmake")
+
 find_file(CLANG_TIDY_PATH
     clang-tidy
 )
 if (EXISTS "${CLANG_TIDY_PATH}")
-    set(CMAKE_CXX_CLANG_TIDY clang-tidy -checks=-*,clang-analyzer-*,modernize-*,readability-*)
+    # use .clang-tidy
+    set(CMAKE_CXX_CLANG_TIDY clang-tidy)
 
     set(CLANG_TIDY_CMD_FILE "compile_commands.json")
     # TODO: don't know why file(CREATE_LINK SYMBOLIC) doesn't work
