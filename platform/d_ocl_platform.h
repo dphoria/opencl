@@ -15,8 +15,10 @@ auto D_OCL_PLATFORM_API gpuPlatformDevices()
     -> std::unordered_map<cl_platform_id, std::vector<cl_device_id>>;
 
 auto D_OCL_PLATFORM_API createContext(cl_platform_id platform,
-                                      std::vector<cl_device_id> devices)
+                                      const std::vector<cl_device_id>& devices)
     -> cl_context;
+auto D_OCL_PLATFORM_API createCmdQueue(cl_device_id device, cl_context context)
+    -> cl_command_queue;
 
 auto D_OCL_PLATFORM_API description(cl_device_id device) -> std::string;
 
