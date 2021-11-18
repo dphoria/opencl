@@ -4,11 +4,8 @@ cmake_policy(SET CMP0074 NEW)
 project(LearnOpenCL C CXX)
 
 set(OpenCL_ROOT /usr/lib/x86_64-linux-gnu/)
-find_package(OpenCL REQUIRED)
+find_package(OpenCL 2 REQUIRED)
 
-if (${OpenCL_VERSION_MAJOR} LESS 2)
-    message(FATAL_ERROR "requires OpenCL 2+")
-endif()
 # opencl will use highest available if not specified
 add_compile_definitions(CL_TARGET_OPENCL_VERSION=200)
 

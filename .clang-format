@@ -6,3 +6,4 @@ AllowAllArgumentsOnNextLine: true
 AllowAllConstructorInitializersOnNextLine: true
 AllowAllParametersOfDeclarationOnNextLine: true
 BreakBeforeBraces: Mozilla
+DerivePointerAlignment: true

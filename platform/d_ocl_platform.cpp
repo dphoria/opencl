@@ -39,6 +39,35 @@ auto gpuDevices(cl_platform_id platform) -> std::vector<cl_device_id>
     return devices;
 }
 
+static auto context_callback(const char* errinfo,
+                             const void* private_info,
+                             size_t cb,
+                             void* user_data) -> void
+{
+    // TODO: use mutex to handle this error; opencl can call this
+    // from multiple threads
+}
+
+auto createContext(cl_platform_id platform, std::vector<cl_device_id> devices)
+    -> cl_context
+{
+    // list is terminated with 0. request to use this platform for the context
+    std::vector<cl_context_properties> contextProperties = {
+        CL_CONTEXT_PLATFORM,
+        reinterpret_cast<cl_context_properties>(platform),
+        0};
+
+    return clCreateContext(contextProperties.data(),
+                           devices.size(),
+                           devices.data(),
+                           // register callback to get errors
+                           // during context creation
+                           // and also at runtime for this context
+                           &context_callback,
+                           nullptr,
+                           nullptr);
+}
+
 auto gpuPlatformDevices()
     -> std::unordered_map<cl_platform_id, std::vector<cl_device_id>>
 {
@@ -57,10 +86,11 @@ auto gpuPlatformDevices()
     return platformDevices;
 }
 
+// wrapper around clGetDeviceInfo()
 template <typename T>
 auto information(cl_device_id device,
                  cl_device_info param_name,
-                 std::vector<T> &param_value,
+                 std::vector<T>& param_value,
                  T default_value) -> bool
 {
     // first find out value string length
@@ -84,6 +114,10 @@ auto information(cl_device_id device,
 auto description(cl_device_id device) -> std::string
 {
     std::ostringstream stream;
+
+    // print like
+    // parameter name: value
+    // parameter name: value1 value2
 
     std::vector<cl_device_info> paramIds = {
         CL_DEVICE_NAME, CL_DEVICE_VENDOR, CL_DEVICE_VERSION};
@@ -114,7 +148,7 @@ auto description(cl_device_id device) -> std::string
         if (information<cl_uint>(device, paramIds[i], value, 0)) {
             for (int j = 0; j < value.size(); j++) {
                 stream << value[j];
-                if (j) {
+                if (j != 0) {
                     // space between numbers if multi-item value
                     stream << " ";
                 }
