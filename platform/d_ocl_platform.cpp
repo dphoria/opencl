@@ -39,10 +39,10 @@ auto gpuDevices(cl_platform_id platform) -> std::vector<cl_device_id>
     return devices;
 }
 
-static auto context_callback(const char* errinfo,
-                             const void* private_info,
-                             size_t cb,
-                             void* user_data) -> void
+auto context_callback(const char* errinfo,
+                      const void* private_info,
+                      size_t cb,
+                      void* user_data) -> void
 {
     // TODO: use mutex to handle this error; opencl can call this
     // from multiple threads

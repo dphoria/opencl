@@ -32,7 +32,7 @@ if __name__ == "__main__":
         description="show diff between original and clang-format output"
     )
     argp.add_argument(
-        "-s", "--src-files", help=";-separated of paths to files to check"
+        "-s", "--src-files", help=";-separated list of paths to files to check"
     )
     args = argp.parse_args()
 

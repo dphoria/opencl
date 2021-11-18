@@ -101,7 +101,7 @@ find_library(OpenCL_LIBRARY
 )
 ```
 
-Neither `AMDAPPSDKROOT` nor `CUDA_PATH` environment variables has `libOpenCL.so`.
+Neither `AMDAPPSDKROOT` nor `CUDA_PATH` environment variable has `libOpenCL.so`.
 
 ```Shell
 $ dpkg -L ocl-icd-libopencl1 | grep -E '\.so'
