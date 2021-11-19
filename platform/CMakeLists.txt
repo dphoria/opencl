@@ -12,4 +12,4 @@ target_compile_definitions(DOclPlatform
 )
 
 # save source file paths for clang-format.py
-make_clang_format_srcs(DOclPlatform ${SOURCES})
+setup_clang_format(DOclPlatform ${SOURCES})

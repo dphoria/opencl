@@ -1,7 +1,7 @@
 set(SOURCES
     main.cpp
-    #programs/3.4-vector-add.cpp
-    #programs/3.4-vector-add.h
+    programs/3.4-vector-add.cpp
+    programs/3.4-vector-add.h
 )
 add_executable(test-opencl ${SOURCES})
 
@@ -10,4 +10,4 @@ target_link_libraries(test-opencl
 )
 
 # save source file paths for clang-format.py
-make_clang_format_srcs(test-opencl ${SOURCES})
+setup_clang_format(test-opencl ${SOURCES})

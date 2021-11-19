@@ -16,14 +16,3 @@ include("base/clang-format.cmake")
 include_directories(${OpenCL_INCLUDE_DIRS})
 add_subdirectory(platform)
 add_subdirectory(test)
-
-add_custom_target(
-    check-clang-format
-    # show diff aginst clang-format
-    COMMAND python scripts/clang-format.py --recurse
-    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
-)
-add_dependencies(check-clang-format
-    DOclPlatform
-    test-opencl
-)
