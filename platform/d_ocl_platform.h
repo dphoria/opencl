@@ -14,6 +14,7 @@ auto D_OCL_PLATFORM_API gpuDevices(cl_platform_id platform)
 auto D_OCL_PLATFORM_API gpuPlatformDevices()
     -> std::unordered_map<cl_platform_id, std::vector<cl_device_id>>;
 
+// must release by clReleaseContext()
 auto D_OCL_PLATFORM_API createContext(cl_platform_id platform,
                                       const std::vector<cl_device_id>& devices)
     -> cl_context;

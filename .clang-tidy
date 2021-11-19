@@ -1,1 +1,2 @@
 Checks: '-checks=-*,clang-analyzer-*,modernize-*,readability-*'
+HeaderFilterRegex: .*

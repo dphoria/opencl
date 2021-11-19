@@ -1,10 +1,8 @@
-set(D_OCL_FILES
+set(SOURCES
     d_ocl_platform.cpp
     d_ocl_platform.h
 )
-add_library(DOclPlatform SHARED
-    ${D_OCL_FILES}
-)
+add_library(DOclPlatform SHARED ${SOURCES})
 
 target_link_libraries(DOclPlatform
     ${OpenCL_LIBRARIES}
@@ -13,4 +11,5 @@ target_compile_definitions(DOclPlatform
     PRIVATE EXPORT_D_OCL_PLATFORM
 )
 
-post_build_clang_format(DOclPlatform ${D_OCL_FILES})
+# save source file paths for clang-format.py
+make_clang_format_srcs(DOclPlatform ${SOURCES})

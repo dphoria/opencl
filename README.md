@@ -116,7 +116,7 @@ Modified CMake file to add to search paths prior to `find_package()`.
 set(OpenCL_ROOT /usr/lib/x86_64-linux-gnu/)
 ```
 
-And made symlink so `find_library(OpenCL)` can find `libOpenCL.so`.
+And made symlink so `find_library()` can find `libOpenCL.so`.
 
 ```Shell
 cd /usr/lib/x86_64-linux-gnu

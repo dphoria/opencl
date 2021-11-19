@@ -1,7 +1,7 @@
 #include "../platform/d_ocl_platform.h"
 #include <iostream>
 
-auto main(int argc, char **argv) -> int
+auto main(int argc, char** argv) -> int
 {
     std::unordered_map<cl_platform_id, std::vector<cl_device_id>>
         platformDevices = gpuPlatformDevices();
@@ -10,7 +10,7 @@ auto main(int argc, char **argv) -> int
         return 1;
     }
 
-    for (const std::pair<cl_platform_id, std::vector<cl_device_id>> &iter :
+    for (const std::pair<cl_platform_id, std::vector<cl_device_id>>& iter :
          platformDevices) {
         for (size_t i = 0; i < iter.second.size(); i++) {
             // pretty print some information about this gpu device

@@ -1,6 +1,7 @@
 #include "d_ocl_platform.h"
 #include <iostream>
 #include <list>
+#include <memory>
 #include <mutex>
 #include <sstream>
 
