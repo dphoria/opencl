@@ -6,7 +6,7 @@ set(SOURCES
 add_executable(test-opencl ${SOURCES})
 
 target_link_libraries(test-opencl
-    DOclPlatform
+    d-ocl-platform
 )
 
 # save source file paths for clang-format.py
