@@ -72,6 +72,11 @@ auto vector_add_3_4() -> bool
         return false;
     }
 
+    // TODO: queue command to set up buffer
+    // read the kernel source from *.c file
+    // run kernel on device
+    // get answer from device to host memory
+
     clReleaseContext(context);
     return true;
 }

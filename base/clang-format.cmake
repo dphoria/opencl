@@ -4,9 +4,7 @@ macro(setup_clang_format target)
     # save source file paths in disk file that the script will read
     file(WRITE "${CLANG_FORMAT_SRC_FILES}" "")
 
-    # make string list of all parameters after the target name
-    # expected to be source file paths relative to current dir
-    # add to list as absolute paths
+    # absolute source file path per line in file
     foreach(file_name ${ARGN})
         file(APPEND "${CLANG_FORMAT_SRC_FILES}" "${CMAKE_CURRENT_LIST_DIR}/${file_name}\n")
     endforeach()
