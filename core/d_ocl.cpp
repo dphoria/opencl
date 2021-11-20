@@ -113,7 +113,6 @@ auto createProgram(cl_context context, const std::string& filePath)
     if (g_scratchBuffer.size() < bufferSize) {
         g_scratchBuffer.resize(bufferSize);
     }
-    std::memset(g_scratchBuffer.data(), '\0', bufferSize);
 
     std::vector<const char*> lines;
     std::vector<size_t> lengths;
@@ -126,11 +125,17 @@ auto createProgram(cl_context context, const std::string& filePath)
     while (stream.getline(line, bufferSize - pos)) {
         lines.push_back(line);
         size_t length = std::strlen(line);
+        // getline() doesn't store the delimiter '\n'
+        std::memset(line + length++, '\n', 1);
+        // each line passed to clCreateProgram() must be null terminated
+        std::memset(line + length, '\0', 1);
+        // line size must exclude null terminator
         lengths.push_back(length);
 
-        // + 1 so that the next line begins after a null terminator
-        pos += length + 1;
-        line += length + 1;
+        // + 1 to go past the null terminator
+        length++;
+        pos += length;
+        line += length;
         if (pos >= bufferSize) {
             std::cerr << filePath << " is more than " << bufferSize << " bytes"
                       << std::endl;
