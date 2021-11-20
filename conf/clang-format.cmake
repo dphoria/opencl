@@ -8,8 +8,6 @@ macro(setup_clang_format target)
     foreach(file_name ${ARGN})
         file(APPEND "${CLANG_FORMAT_SRC_FILES}" "${CMAKE_CURRENT_LIST_DIR}/${file_name}\n")
     endforeach()
-
-    add_dependencies(${target} check-clang-format)
 endmacro()
 
 # build this to show clang-format diff
@@ -20,10 +18,25 @@ add_custom_command(
     WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
 )
 
-# build this to apply clang-format diff to source files in-place
+# build this to apply clang-format
 add_custom_target(apply-clang-format)
 add_custom_command(
     TARGET apply-clang-format PRE_BUILD
+    # apply diff in-place
     COMMAND python scripts/clang-format.py --recurse --write
     WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
 )
+
+add_custom_target(clang-format-applied)
+add_dependencies(clang-format-applied apply-clang-format)
+
+# {ARGN} are expected to be the build targets
+macro(make_clang_format_target)
+    add_custom_target(targets-built)
+    # build the targets using clang-formatted source files
+    add_dependencies(targets-built clang-format-applied ${ARGN})
+
+    # build this to clang-format + build
+    add_custom_target(build-clang-format)
+    add_dependencies(build-clang-format targets-built)
+endmacro()

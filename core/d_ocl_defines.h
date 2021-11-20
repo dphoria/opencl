@@ -5,9 +5,9 @@
 #include <CL/cl.h>
 
 #ifdef EXPORT_D_OCL_PLATFORM
-#define D_OCL_PLATFORM_API __attribute__((visibility("default")))
+#define D_OCL_API __attribute__((visibility("default")))
 #else
-#define D_OCL_PLATFORM_API
+#define D_OCL_API
 #endif
 
 // managed to ensure release

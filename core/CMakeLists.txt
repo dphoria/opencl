@@ -1,6 +1,6 @@
 set(SOURCES
-    d_ocl_platform.cpp
-    d_ocl_platform.h
+    d_ocl.cpp
+    d_ocl.h
 )
 add_library(d-ocl-platform SHARED ${SOURCES})
 

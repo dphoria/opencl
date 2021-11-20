@@ -10,9 +10,11 @@ set(CMAKE_CXX_STANDARD 11)
 # opencl will use highest available if not specified
 add_compile_definitions(CL_TARGET_OPENCL_VERSION=200)
 
-include("base/clang-tidy.cmake")
-include("base/clang-format.cmake")
+include("conf/clang-tidy.cmake")
+include("conf/clang-format.cmake")
 
 include_directories(${OpenCL_INCLUDE_DIRS})
-add_subdirectory(platform)
+add_subdirectory(core)
 add_subdirectory(test)
+
+make_clang_format_target(d-ocl-platform test-opencl)

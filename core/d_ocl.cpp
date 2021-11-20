@@ -1,4 +1,4 @@
-#include "d_ocl_platform.h"
+#include "d_ocl.h"
 #include <cstdlib>
 #include <cstring>
 #include <fstream>
@@ -139,20 +139,20 @@ auto createProgram(cl_context context, const std::string& filePath)
 
     std::vector<const char*> lines;
     std::vector<size_t> lengths;
-
     // offset in g_scratchBuffer for the next line
     size_t pos = 0;
+    char* line = g_scratchBuffer.data();
     std::ifstream stream(filePath);
-    // store each line as char*; clCreateProgram() wants char**
-    while (stream.getline(g_scratchBuffer.data() + pos, bufferSize - pos)) {
-        char* line = g_scratchBuffer.data() + pos;
-        lines.push_back(line);
 
+    // store each line as char*; clCreateProgram() wants char**
+    while (stream.getline(line, bufferSize - pos)) {
+        lines.push_back(line);
         size_t length = std::strlen(line);
         lengths.push_back(length);
 
         // + 1 so that the next line begins after a null terminator
         pos += length + 1;
+        line += length + 1;
         if (pos >= bufferSize) {
             std::cerr << filePath << " is more than " << bufferSize << " bytes"
                       << std::endl;

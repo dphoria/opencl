@@ -1,5 +1,5 @@
 #include "3.4-vector-add.h"
-#include "../../platform/d_ocl_platform.h"
+#include "../../core/d_ocl.h"
 #include <iostream>
 #include <vector>
 

@@ -1,4 +1,4 @@
-#include "../platform/d_ocl_platform.h"
+#include "../core/d_ocl.h"
 #include <iostream>
 
 auto main(int argc, char** argv) -> int
