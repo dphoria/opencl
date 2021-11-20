@@ -1,8 +1,8 @@
 #ifndef D_OCL_PLATFORM_DEFS_H
 #define D_OCL_PLATFORM_DEFS_H
 
-
 #include <CL/cl.h>
+#include <memory>
 
 #ifdef EXPORT_D_OCL_PLATFORM
 #define D_OCL_API __attribute__((visibility("default")))
@@ -10,20 +10,38 @@
 #define D_OCL_API
 #endif
 
-// managed to ensure release
-struct d_ocl_context
+// ensure release when finished with open resource like cl_context
+template<typename T>
+struct d_ocl_manager
 {
-    d_ocl_context(cl_context c)
+    // e.g. clReleaseContext
+    using opencl_release_func = cl_int (*)(T);
+
+    static auto makeShared(T openclObject, opencl_release_func releaseFunc)
+        -> std::shared_ptr<d_ocl_manager<T>>
     {
-        context = c;
+        if (openclObject == nullptr) {
+            // operator bool will fail test
+            return std::shared_ptr<d_ocl_manager<T>>();
+        }
+
+        return std::make_shared<d_ocl_manager<T>>(openclObject, releaseFunc);
     }
-    ~d_ocl_context()
+
+    d_ocl_manager(T openclObject, opencl_release_func releaseFunc)
     {
-        if (context != nullptr) {
-            clReleaseContext(context);
+        this->openclObject = openclObject;
+        this->releaseFunc = releaseFunc;
+    }
+    ~d_ocl_manager()
+    {
+        if (openclObject != nullptr) {
+            releaseFunc(openclObject);
         }
     }
-    cl_context context{nullptr};
+
+    T openclObject{nullptr};
+    opencl_release_func releaseFunc;
 };
 
-#endif  // D_OCL_PLATFORM_DEFS_H
+#endif // D_OCL_PLATFORM_DEFS_H

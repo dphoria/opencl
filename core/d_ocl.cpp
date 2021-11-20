@@ -76,7 +76,7 @@ auto handleError(const char* errinfo,
 
 auto createContext(cl_platform_id platform,
                    const std::vector<cl_device_id>& devices)
-    -> std::shared_ptr<d_ocl_context>
+    -> std::shared_ptr<d_ocl_manager<cl_context>>
 {
     // list is terminated with 0. request to use this platform for the context
     std::vector<cl_context_properties> contextProperties
@@ -84,8 +84,7 @@ auto createContext(cl_platform_id platform,
            reinterpret_cast<cl_context_properties>(platform),
            0};
 
-    // ensure clReleaseContext() in ~d_ocl_context()
-    return std::make_shared<d_ocl_context>(
+    return d_ocl_manager<cl_context>::makeShared(
         clCreateContext(contextProperties.data(),
                         devices.size(),
                         devices.data(),
@@ -94,7 +93,8 @@ auto createContext(cl_platform_id platform,
                         // and also at runtime for this context
                         &handleError,
                         &g_mutex,
-                        nullptr));
+                        nullptr),
+        &clReleaseContext);
 }
 
 auto createCmdQueue(cl_device_id device, cl_context context) -> cl_command_queue
@@ -102,30 +102,6 @@ auto createCmdQueue(cl_device_id device, cl_context context) -> cl_command_queue
     return clCreateCommandQueueWithProperties(
         context, device, nullptr, nullptr);
 }
-
-// wrapper around clGetDeviceInfo()
-template <typename T>
-auto information(cl_device_id device,
-                 cl_device_info param_name,
-                 std::vector<T>& param_value,
-                 T default_value) -> bool
-{
-    // first find out value string length
-    size_t requiredSize = 0;
-    // requiredSize will be set to value string length
-    if (clGetDeviceInfo(
-            device, param_name, 0, param_value.data(), &requiredSize)
-            != CL_SUCCESS
-        || !requiredSize) {
-        return false;
-    }
-
-    // add 1 for safety, like null-termination
-    param_value.resize(requiredSize + 1, default_value);
-    return (clGetDeviceInfo(
-                device, param_name, requiredSize, param_value.data(), nullptr)
-            == CL_SUCCESS);
-};
 
 auto createProgram(cl_context context, const std::string& filePath)
     -> cl_program
@@ -163,6 +139,30 @@ auto createProgram(cl_context context, const std::string& filePath)
     return clCreateProgramWithSource(
         context, lines.size(), lines.data(), lengths.data(), nullptr);
 }
+
+// wrapper around clGetDeviceInfo()
+template<typename T>
+auto information(cl_device_id device,
+                 cl_device_info param_name,
+                 std::vector<T>& param_value,
+                 T default_value) -> bool
+{
+    // first find out value string length
+    size_t requiredSize = 0;
+    // requiredSize will be set to value string length
+    if (clGetDeviceInfo(
+            device, param_name, 0, param_value.data(), &requiredSize)
+            != CL_SUCCESS
+        || !requiredSize) {
+        return false;
+    }
+
+    // add 1 for safety, like null-termination
+    param_value.resize(requiredSize + 1, default_value);
+    return (clGetDeviceInfo(
+                device, param_name, requiredSize, param_value.data(), nullptr)
+            == CL_SUCCESS);
+};
 
 auto description(cl_device_id device) -> std::string
 {
