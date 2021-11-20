@@ -1,0 +1,34 @@
+{
+    "tasks": [
+        {
+            "label": "build",
+            "type": "shell",
+            "command": "make -C ./build check-clang-format",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+              }
+        },
+        {
+            "label": "clang-format-fix",
+            "type": "shell",
+            "command": "make -C ./build apply-clang-format",
+            "group": {
+                "kind": "build",
+                "isDefault": false
+              }
+        },
+        {
+            // apply clang-format fix then build
+            "label": "build-clang-format-fix",
+            "type": "shell",
+            "dependsOrder": "sequence",
+            "dependsOn": ["clang-format-fix", "build"],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+              }
+        }
+    ],
+    "version": "2.0.0"
+}

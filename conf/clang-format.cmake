@@ -27,16 +27,8 @@ add_custom_command(
     WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
 )
 
-add_custom_target(clang-format-applied)
-add_dependencies(clang-format-applied apply-clang-format)
-
-# {ARGN} are expected to be the build targets
+# {ARGN} are expected to be project build targets
 macro(make_clang_format_target)
-    add_custom_target(targets-built)
-    # build the targets using clang-formatted source files
-    add_dependencies(targets-built clang-format-applied ${ARGN})
-
-    # build this to clang-format + build
-    add_custom_target(build-clang-format)
-    add_dependencies(build-clang-format targets-built)
+    # show clang-format diff + build
+    add_dependencies(check-clang-format ${ARGN})
 endmacro()
