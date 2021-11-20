@@ -49,25 +49,34 @@ auto vector_add_3_4() -> bool
 
     // device-side memory
     // initialize with data from host-side vector
-    cl_mem deviceA = clCreateBuffer(context->openclObject,
-                                    CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY
-                                        | CL_MEM_COPY_HOST_PTR,
-                                    dataSize,
-                                    hostA.data(),
-                                    nullptr);
-    cl_mem deviceB = clCreateBuffer(context->openclObject,
-                                    CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY
-                                        | CL_MEM_COPY_HOST_PTR,
-                                    dataSize,
-                                    hostB.data(),
-                                    nullptr);
+    std::shared_ptr<d_ocl_manager<cl_mem>> deviceA
+        = d_ocl_manager<cl_mem>::makeShared(
+            clCreateBuffer(context->openclObject,
+                           CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY
+                               | CL_MEM_COPY_HOST_PTR,
+                           dataSize,
+                           hostA.data(),
+                           nullptr),
+            &clReleaseMemObject);
+    std::shared_ptr<d_ocl_manager<cl_mem>> deviceB
+        = d_ocl_manager<cl_mem>::makeShared(
+            clCreateBuffer(context->openclObject,
+                           CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY
+                               | CL_MEM_COPY_HOST_PTR,
+                           dataSize,
+                           hostB.data(),
+                           nullptr),
+            &clReleaseMemObject);
     // to get answer from device to host accessible memory
-    cl_mem deviceC = clCreateBuffer(context->openclObject,
-                                    CL_MEM_WRITE_ONLY | CL_MEM_HOST_READ_ONLY,
-                                    dataSize,
-                                    nullptr,
-                                    nullptr);
-    if (deviceA == nullptr || deviceB == nullptr || deviceC == nullptr) {
+    std::shared_ptr<d_ocl_manager<cl_mem>> deviceC
+        = d_ocl_manager<cl_mem>::makeShared(
+            clCreateBuffer(context->openclObject,
+                           CL_MEM_WRITE_ONLY | CL_MEM_HOST_READ_ONLY,
+                           dataSize,
+                           nullptr,
+                           nullptr),
+            &clReleaseMemObject);
+    if (!deviceA || !deviceB || !deviceC) {
         std::cerr << "error creating device-side buffer" << std::endl;
         return false;
     }
