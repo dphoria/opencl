@@ -35,13 +35,13 @@ struct d_ocl_manager
     }
     ~d_ocl_manager()
     {
-        if (openclObject != nullptr) {
+        if (openclObject != nullptr && releaseFunc != nullptr) {
             releaseFunc(openclObject);
         }
     }
 
     T openclObject{nullptr};
-    opencl_release_func releaseFunc;
+    opencl_release_func releaseFunc{nullptr};
 };
 
 #endif // D_OCL_PLATFORM_DEFS_H

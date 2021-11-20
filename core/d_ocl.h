@@ -21,11 +21,11 @@ auto D_OCL_API createContext(cl_platform_id platform,
                              const std::vector<cl_device_id>& devices)
     -> std::shared_ptr<d_ocl_manager<cl_context>>;
 auto D_OCL_API createCmdQueue(cl_device_id device, cl_context context)
-    -> cl_command_queue;
+    -> std::shared_ptr<d_ocl_manager<cl_command_queue>>;
 
 // read kernel source from filePath to create cl_program
 auto D_OCL_API createProgram(cl_context context, const std::string& filePath)
-    -> cl_program;
+    -> std::shared_ptr<d_ocl_manager<cl_program>>;
 
 // generate human-readable description
 auto D_OCL_API description(cl_device_id device) -> std::string;

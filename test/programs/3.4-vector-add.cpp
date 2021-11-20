@@ -32,36 +32,37 @@ auto vector_add_3_4() -> bool
     // guaranteed to have at least 1 device in platform.
     // just going to use the first one
     cl_device_id device = platformIter->second[0];
-    std::shared_ptr<d_ocl_manager<cl_context>> contextManager = createContext(
+
+    std::shared_ptr<d_ocl_manager<cl_context>> context = createContext(
         platformIter->first, std::vector<cl_device_id>(1, device));
-    if (!contextManager) {
+    if (!context) {
         std::cerr << "error creating gpu device context" << std::endl;
         return false;
     }
     // to communicate with device
-    cl_command_queue cmdQueue
-        = createCmdQueue(device, contextManager->openclObject);
-    if (cmdQueue == nullptr) {
+    std::shared_ptr<d_ocl_manager<cl_command_queue>> cmdQueue
+        = createCmdQueue(device, context->openclObject);
+    if (!cmdQueue) {
         std::cerr << "error creating gpu device cmd queue" << std::endl;
         return false;
     }
 
     // device-side memory
     // initialize with data from host-side vector
-    cl_mem deviceA = clCreateBuffer(contextManager->openclObject,
+    cl_mem deviceA = clCreateBuffer(context->openclObject,
                                     CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY
                                         | CL_MEM_COPY_HOST_PTR,
                                     dataSize,
                                     hostA.data(),
                                     nullptr);
-    cl_mem deviceB = clCreateBuffer(contextManager->openclObject,
+    cl_mem deviceB = clCreateBuffer(context->openclObject,
                                     CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY
                                         | CL_MEM_COPY_HOST_PTR,
                                     dataSize,
                                     hostB.data(),
                                     nullptr);
     // to get answer from device to host accessible memory
-    cl_mem deviceC = clCreateBuffer(contextManager->openclObject,
+    cl_mem deviceC = clCreateBuffer(context->openclObject,
                                     CL_MEM_WRITE_ONLY | CL_MEM_HOST_READ_ONLY,
                                     dataSize,
                                     nullptr,

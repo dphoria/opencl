@@ -97,14 +97,16 @@ auto createContext(cl_platform_id platform,
         &clReleaseContext);
 }
 
-auto createCmdQueue(cl_device_id device, cl_context context) -> cl_command_queue
+auto createCmdQueue(cl_device_id device, cl_context context)
+    -> std::shared_ptr<d_ocl_manager<cl_command_queue>>
 {
-    return clCreateCommandQueueWithProperties(
-        context, device, nullptr, nullptr);
+    return d_ocl_manager<cl_command_queue>::makeShared(
+        clCreateCommandQueueWithProperties(context, device, nullptr, nullptr),
+        &clReleaseCommandQueue);
 }
 
 auto createProgram(cl_context context, const std::string& filePath)
-    -> cl_program
+    -> std::shared_ptr<d_ocl_manager<cl_program>>
 {
     // something really wrong if a single source file is more than 8 mb
     const size_t bufferSize = 1 << 23;
@@ -132,12 +134,14 @@ auto createProgram(cl_context context, const std::string& filePath)
         if (pos >= bufferSize) {
             std::cerr << filePath << " is more than " << bufferSize << " bytes"
                       << std::endl;
-            return nullptr;
+            return std::shared_ptr<d_ocl_manager<cl_program>>();
         }
     }
 
-    return clCreateProgramWithSource(
-        context, lines.size(), lines.data(), lengths.data(), nullptr);
+    return d_ocl_manager<cl_program>::makeShared(
+        clCreateProgramWithSource(
+            context, lines.size(), lines.data(), lengths.data(), nullptr),
+        &clReleaseProgram);
 }
 
 // wrapper around clGetDeviceInfo()
