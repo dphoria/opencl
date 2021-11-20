@@ -132,7 +132,9 @@ auto createProgram(cl_context context, const std::string& filePath)
 {
     // something really wrong if a single source file is more than 8 mb
     const size_t bufferSize = 1 << 23;
-    g_scratchBuffer.resize(bufferSize);
+    if (g_scratchBuffer.size() < bufferSize) {
+        g_scratchBuffer.resize(bufferSize);
+    }
     std::memset(g_scratchBuffer.data(), '\0', bufferSize);
 
     std::vector<const char*> lines;
