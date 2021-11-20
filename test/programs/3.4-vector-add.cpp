@@ -93,7 +93,20 @@ auto vector_add_3_4() -> bool
             clCreateKernel(program->openclObject, TEST_PROGRAM_NAME, nullptr),
             &clReleaseKernel);
     }
-    if (!program || !kernel) {
+
+    if (!program
+        || !kernel
+        // arguments for
+        // vector_add(__global int* A, __global int* B, __global int* C)
+        || clSetKernelArg(
+               kernel->openclObject, 0, sizeof(cl_mem), &deviceA->openclObject)
+               != CL_SUCCESS
+        || clSetKernelArg(
+               kernel->openclObject, 1, sizeof(cl_mem), &deviceB->openclObject)
+               != CL_SUCCESS
+        || clSetKernelArg(
+               kernel->openclObject, 2, sizeof(cl_mem), &deviceC->openclObject)
+               != CL_SUCCESS) {
         std::cerr << "error creating program kernel" << std::endl;
         return false;
     }
