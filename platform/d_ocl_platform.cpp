@@ -127,6 +127,41 @@ auto information(cl_device_id device,
             == CL_SUCCESS);
 };
 
+auto createProgram(cl_context context, const std::string& filePath)
+    -> cl_program
+{
+    // something really wrong if a single source file is more than 8 mb
+    const size_t bufferSize = 1 << 23;
+    g_scratchBuffer.resize(bufferSize);
+    std::memset(g_scratchBuffer.data(), '\0', bufferSize);
+
+    std::vector<const char*> lines;
+    std::vector<size_t> lengths;
+
+    // offset in g_scratchBuffer for the next line
+    size_t pos = 0;
+    std::ifstream stream(filePath);
+    // store each line as char*; clCreateProgram() wants char**
+    while (stream.getline(g_scratchBuffer.data() + pos, bufferSize - pos)) {
+        char* line = g_scratchBuffer.data() + pos;
+        lines.push_back(line);
+
+        size_t length = std::strlen(line);
+        lengths.push_back(length);
+
+        // + 1 so that the next line begins after a null terminator
+        pos += length + 1;
+        if (pos >= bufferSize) {
+            std::cerr << filePath << " is more than " << bufferSize << " bytes"
+                      << std::endl;
+            return nullptr;
+        }
+    }
+
+    return clCreateProgramWithSource(
+        context, lines.size(), lines.data(), lengths.data(), nullptr);
+}
+
 auto description(cl_device_id device) -> std::string
 {
     std::ostringstream stream;

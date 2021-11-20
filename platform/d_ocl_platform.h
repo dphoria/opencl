@@ -22,6 +22,11 @@ auto D_OCL_PLATFORM_API createContext(cl_platform_id platform,
 auto D_OCL_PLATFORM_API createCmdQueue(cl_device_id device, cl_context context)
     -> cl_command_queue;
 
+// read kernel source from filePath to create cl_program
+auto D_OCL_PLATFORM_API createProgram(cl_context context,
+                                      const std::string& filePath)
+    -> cl_program;
+
 auto D_OCL_PLATFORM_API description(cl_device_id device) -> std::string;
 
 #endif // D_OCL_PLATFORM_H
