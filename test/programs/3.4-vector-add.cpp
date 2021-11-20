@@ -114,14 +114,39 @@ auto vector_add_3_4() -> bool
     cl_event kernel_event;
     // queue the kernel onto the device
     // read the answer into host buffer after kernel is finished
-    if (clEnqueueNDRangeKernel(cmdQueue->openclObject, kernel->openclObject, 1, nullptr, &numElements, nullptr, 0, nullptr, &kernel_event) != CL_SUCCESS
-        || clEnqueueReadBuffer(cmdQueue->openclObject, deviceC->openclObject, CL_TRUE, 0, dataSize, hostC.data(), 1, &kernel_event, nullptr) != CL_SUCCESS) {
+    if (clEnqueueNDRangeKernel(cmdQueue->openclObject,
+                               kernel->openclObject,
+                               1,
+                               nullptr,
+                               &numElements,
+                               nullptr,
+                               0,
+                               nullptr,
+                               &kernel_event)
+            != CL_SUCCESS
+        || clEnqueueReadBuffer(cmdQueue->openclObject,
+                               deviceC->openclObject,
+                               CL_TRUE,
+                               0,
+                               dataSize,
+                               hostC.data(),
+                               1,
+                               &kernel_event,
+                               nullptr)
+               != CL_SUCCESS) {
         std::cerr << "error running program kernel" << std::endl;
         return false;
     }
 
-    // run kernel on device
-    // get answer from device to host memory
+    // check answer
+    for (size_t i = 0; i < numElements; i++) {
+        if (hostA[i] + hostB[i] != hostC[i]) {
+            std::cerr << hostA[i] << " + " << hostB[i] << " = "
+                      << hostA[i] + hostB[i] << " != " << hostC[i]
+                      << " (calculated)" << std::endl;
+            return false;
+        }
+    }
 
     return true;
 }
