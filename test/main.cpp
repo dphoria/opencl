@@ -1,5 +1,9 @@
 #include "../core/d_ocl.h"
+#include "programs/programs-defines.h"
 #include <iostream>
+
+std::list<std::string> g_testNames;
+std::list<d_ocl_test_func> g_testFunctions;
 
 auto main(int argc, char** argv) -> int
 {
@@ -19,6 +23,30 @@ auto main(int argc, char** argv) -> int
                       << "----" << std::endl
                       << description(iter.second[i]) << std::endl;
         }
+    }
+
+    // ----
+    // 3.4-vector-add : begin
+    // ----
+    // ...
+    // 3.4-vector-add : fail
+
+    auto nameIter = g_testNames.cbegin();
+    auto funcIter = g_testFunctions.cbegin();
+    while (nameIter != g_testNames.cend()
+           && funcIter != g_testFunctions.cend()) {
+        std::cout << "----" << std::endl
+                  << *nameIter << " : begin " << std::endl
+                  << "----" << std::endl;
+        // e.g. vector_add_3_4()
+        if ((*funcIter)()) {
+            std::cout << *nameIter << " : pass" << std::endl;
+        } else {
+            std::cerr << *nameIter << " : fail" << std::endl;
+        }
+
+        nameIter++;
+        funcIter++;
     }
 
     return 0;

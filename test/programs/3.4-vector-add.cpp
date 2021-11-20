@@ -1,9 +1,8 @@
 #include "3.4-vector-add.h"
 #include "../../core/d_ocl.h"
+#include "programs-defines.h"
 #include <iostream>
 #include <vector>
-
-#define TEST_PROGRAM_NAME "3.4-vector-add"
 
 auto vector_add_3_4() -> bool
 {
@@ -85,12 +84,12 @@ auto vector_add_3_4() -> bool
 
     // compile and link the program
     std::shared_ptr<d_ocl_manager<cl_program>> program = createProgram(
-        context->openclObject, PROGRAM_SRC_ROOT "/" TEST_PROGRAM_NAME ".c");
+        context->openclObject, PROGRAM_SRC_ROOT "/" PROG_VECTOR_ADD_3_4 ".c");
     std::shared_ptr<d_ocl_manager<cl_kernel>> kernel;
     if (program) {
         // make a kernel out of the program
         kernel = std::make_shared<d_ocl_manager<cl_kernel>>(
-            clCreateKernel(program->openclObject, TEST_PROGRAM_NAME, nullptr),
+            clCreateKernel(program->openclObject, PROG_VECTOR_ADD_3_4, nullptr),
             &clReleaseKernel);
     }
 
@@ -141,12 +140,14 @@ auto vector_add_3_4() -> bool
     // check answer
     for (size_t i = 0; i < numElements; i++) {
         if (hostA[i] + hostB[i] != hostC[i]) {
-            std::cerr << hostA[i] << " + " << hostB[i] << " = "
-                      << hostA[i] + hostB[i] << " != " << hostC[i]
-                      << " (calculated)" << std::endl;
+            std::cerr << hostA[i] << " + " << hostB[i] << " != " << hostC[i]
+                      << std::endl;
             return false;
         }
     }
 
     return true;
 }
+
+// append to g_testNames and g_testFunctions
+REGISTER_TEST_PROG(vector_add_3_4, PROG_VECTOR_ADD_3_4, &vector_add_3_4)
