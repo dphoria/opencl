@@ -19,7 +19,9 @@ struct d_ocl_context
     }
     ~d_ocl_context()
     {
-        clReleaseContext(context);
+        if (context != nullptr) {
+            clReleaseContext(context);
+        }
     }
     cl_context context{nullptr};
 };
