@@ -16,8 +16,8 @@ auto gpuPlatforms() -> std::vector<cl_platform_id>
     }
 
     std::vector<cl_platform_id> platforms(numPlatforms);
-    if (clGetPlatformIDs(numPlatforms, platforms.data(), nullptr) !=
-        CL_SUCCESS) {
+    if (clGetPlatformIDs(numPlatforms, platforms.data(), nullptr)
+        != CL_SUCCESS) {
         platforms.clear();
     }
 
@@ -27,17 +27,15 @@ auto gpuPlatforms() -> std::vector<cl_platform_id>
 auto gpuDevices(cl_platform_id platform) -> std::vector<cl_device_id>
 {
     cl_uint numDevices;
-    if (clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 0, nullptr, &numDevices) !=
-        CL_SUCCESS) {
+    if (clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 0, nullptr, &numDevices)
+        != CL_SUCCESS) {
         numDevices = 0;
     }
 
     std::vector<cl_device_id> devices(numDevices);
-    if (clGetDeviceIDs(platform,
-                       CL_DEVICE_TYPE_GPU,
-                       numDevices,
-                       devices.data(),
-                       nullptr) != CL_SUCCESS) {
+    if (clGetDeviceIDs(
+            platform, CL_DEVICE_TYPE_GPU, numDevices, devices.data(), nullptr)
+        != CL_SUCCESS) {
         devices.clear();
     }
 
@@ -76,10 +74,10 @@ auto createContext(cl_platform_id platform,
                    const std::vector<cl_device_id>& devices) -> cl_context
 {
     // list is terminated with 0. request to use this platform for the context
-    std::vector<cl_context_properties> contextProperties = {
-        CL_CONTEXT_PLATFORM,
-        reinterpret_cast<cl_context_properties>(platform),
-        0};
+    std::vector<cl_context_properties> contextProperties
+        = {CL_CONTEXT_PLATFORM,
+           reinterpret_cast<cl_context_properties>(platform),
+           0};
 
     return clCreateContext(contextProperties.data(),
                            devices.size(),
@@ -109,18 +107,17 @@ auto information(cl_device_id device,
     size_t requiredSize = 0;
     // requiredSize will be set to value string length
     if (clGetDeviceInfo(
-            device, param_name, 0, param_value.data(), &requiredSize) !=
-            CL_SUCCESS ||
-        !requiredSize) {
+            device, param_name, 0, param_value.data(), &requiredSize)
+            != CL_SUCCESS
+        || !requiredSize) {
         return false;
     }
 
     // add 1 for safety, like null-termination
     param_value.resize(requiredSize + 1, default_value);
-    return (
-        clGetDeviceInfo(
-            device, param_name, requiredSize, param_value.data(), nullptr) ==
-        CL_SUCCESS);
+    return (clGetDeviceInfo(
+                device, param_name, requiredSize, param_value.data(), nullptr)
+            == CL_SUCCESS);
 };
 
 auto description(cl_device_id device) -> std::string
@@ -131,10 +128,10 @@ auto description(cl_device_id device) -> std::string
     // parameter name: value
     // parameter name: value1 value2
 
-    std::vector<cl_device_info> paramIds = {
-        CL_DEVICE_NAME, CL_DEVICE_VENDOR, CL_DEVICE_VERSION};
-    std::vector<std::string> paramNames = {
-        "CL_DEVICE_NAME", "CL_DEVICE_VENDOR", "CL_DEVICE_VERSION"};
+    std::vector<cl_device_info> paramIds
+        = {CL_DEVICE_NAME, CL_DEVICE_VENDOR, CL_DEVICE_VERSION};
+    std::vector<std::string> paramNames
+        = {"CL_DEVICE_NAME", "CL_DEVICE_VENDOR", "CL_DEVICE_VERSION"};
     for (int i = 0; i < paramIds.size(); i++) {
         stream << paramNames[i] << ": ";
 

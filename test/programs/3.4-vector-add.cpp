@@ -49,14 +49,14 @@ auto vector_add_3_4() -> bool
     // device-side memory
     // initialize with data from host-side vector
     cl_mem deviceA = clCreateBuffer(context,
-                                    CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY |
-                                        CL_MEM_COPY_HOST_PTR,
+                                    CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY
+                                        | CL_MEM_COPY_HOST_PTR,
                                     dataSize,
                                     hostA.data(),
                                     nullptr);
     cl_mem deviceB = clCreateBuffer(context,
-                                    CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY |
-                                        CL_MEM_COPY_HOST_PTR,
+                                    CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY
+                                        | CL_MEM_COPY_HOST_PTR,
                                     dataSize,
                                     hostB.data(),
                                     nullptr);
