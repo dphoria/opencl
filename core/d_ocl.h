@@ -24,6 +24,7 @@ auto D_OCL_API createCmdQueue(cl_device_id device, cl_context context)
     -> std::shared_ptr<d_ocl_manager<cl_command_queue>>;
 
 // read kernel source from filePath to create cl_program
+// program will have been built (compile, link)
 auto D_OCL_API createProgram(cl_context context, const std::string& filePath)
     -> std::shared_ptr<d_ocl_manager<cl_program>>;
 
