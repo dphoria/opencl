@@ -3,6 +3,8 @@
 #include <iostream>
 #include <vector>
 
+#define TEST_PROGRAM_NAME "3.4-vector-add"
+
 auto vector_add_3_4() -> bool
 {
     // number of items in each array
@@ -81,7 +83,21 @@ auto vector_add_3_4() -> bool
         return false;
     }
 
-    // TODO: read the kernel source from *.c file
+    // compile and link the program
+    std::shared_ptr<d_ocl_manager<cl_program>> program = createProgram(
+        context->openclObject, PROGRAM_SRC_ROOT "/" TEST_PROGRAM_NAME ".c");
+    std::shared_ptr<d_ocl_manager<cl_kernel>> kernel;
+    if (program) {
+        // make a kernel out of the program
+        kernel = std::make_shared<d_ocl_manager<cl_kernel>>(
+            clCreateKernel(program->openclObject, TEST_PROGRAM_NAME, nullptr),
+            &clReleaseKernel);
+    }
+    if (!program || !kernel) {
+        std::cerr << "error creating program kernel" << std::endl;
+        return false;
+    }
+
     // run kernel on device
     // get answer from device to host memory
 

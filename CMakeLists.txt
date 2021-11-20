@@ -17,4 +17,4 @@ include_directories(${OpenCL_INCLUDE_DIRS})
 add_subdirectory(core)
 add_subdirectory(test)
 
-make_clang_format_target(d-ocl-platform test-opencl)
+make_clang_format_target(d-ocl-core test-opencl)

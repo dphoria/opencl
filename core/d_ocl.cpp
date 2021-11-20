@@ -105,7 +105,7 @@ auto createCmdQueue(cl_device_id device, cl_context context)
         &clReleaseCommandQueue);
 }
 
-auto createProgram(cl_device_id device, cl_context context, const std::string& filePath)
+auto createProgram(cl_context context, const std::string& filePath)
     -> std::shared_ptr<d_ocl_manager<cl_program>>
 {
     // something really wrong if a single source file is more than 8 mb
@@ -143,16 +143,19 @@ auto createProgram(cl_device_id device, cl_context context, const std::string& f
         }
     }
 
-    std::shared_ptr<d_ocl_manager<cl_program>> program = d_ocl_manager<cl_program>::makeShared(
-        clCreateProgramWithSource(
-            context, lines.size(), lines.data(), lengths.data(), nullptr),
-        &clReleaseProgram);
+    std::shared_ptr<d_ocl_manager<cl_program>> program
+        = d_ocl_manager<cl_program>::makeShared(
+            clCreateProgramWithSource(
+                context, lines.size(), lines.data(), lengths.data(), nullptr),
+            &clReleaseProgram);
     if (!program) {
         return program;
     }
 
     // compile and link the program
-    if (clBuildProgram(program->openclObject, 0, nullptr, nullptr, nullptr, nullptr) != CL_SUCCESS) {
+    if (clBuildProgram(
+            program->openclObject, 0, nullptr, nullptr, nullptr, nullptr)
+        != CL_SUCCESS) {
         // clReleaseProgram if build failed
         program.reset();
     }
