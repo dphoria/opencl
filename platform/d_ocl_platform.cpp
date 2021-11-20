@@ -1,11 +1,15 @@
 #include "d_ocl_platform.h"
+#include <cstdlib>
+#include <cstring>
+#include <fstream>
 #include <iostream>
 #include <list>
-#include <memory>
 #include <mutex>
 #include <sstream>
 
 static std::mutex g_mutex;
+// all-purpose buffer e.g. for file i/o
+static std::vector<char> g_scratchBuffer;
 
 auto gpuPlatforms() -> std::vector<cl_platform_id>
 {
@@ -71,7 +75,8 @@ auto handleError(const char* errinfo,
 }
 
 auto createContext(cl_platform_id platform,
-                   const std::vector<cl_device_id>& devices) -> cl_context
+                   const std::vector<cl_device_id>& devices)
+    -> std::shared_ptr<d_ocl_context>
 {
     // list is terminated with 0. request to use this platform for the context
     std::vector<cl_context_properties> contextProperties
@@ -79,15 +84,17 @@ auto createContext(cl_platform_id platform,
            reinterpret_cast<cl_context_properties>(platform),
            0};
 
-    return clCreateContext(contextProperties.data(),
-                           devices.size(),
-                           devices.data(),
-                           // register callback to get errors
-                           // during context creation
-                           // and also at runtime for this context
-                           &handleError,
-                           &g_mutex,
-                           nullptr);
+    // ensure clReleaseContext() in ~d_ocl_context()
+    return std::make_shared<d_ocl_context>(
+        clCreateContext(contextProperties.data(),
+                        devices.size(),
+                        devices.data(),
+                        // register callback to get errors
+                        // during context creation
+                        // and also at runtime for this context
+                        &handleError,
+                        &g_mutex,
+                        nullptr));
 }
 
 auto createCmdQueue(cl_device_id device, cl_context context) -> cl_command_queue

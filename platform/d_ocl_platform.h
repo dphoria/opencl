@@ -3,6 +3,7 @@
 
 #include "d_ocl_platform_defines.h"
 #include <CL/cl.h>
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -14,10 +15,10 @@ auto D_OCL_PLATFORM_API gpuDevices(cl_platform_id platform)
 auto D_OCL_PLATFORM_API gpuPlatformDevices()
     -> std::unordered_map<cl_platform_id, std::vector<cl_device_id>>;
 
-// must release by clReleaseContext()
+// d_ocl_context::context is auto released when finished
 auto D_OCL_PLATFORM_API createContext(cl_platform_id platform,
                                       const std::vector<cl_device_id>& devices)
-    -> cl_context;
+    -> std::shared_ptr<d_ocl_context>;
 auto D_OCL_PLATFORM_API createCmdQueue(cl_device_id device, cl_context context)
     -> cl_command_queue;
 

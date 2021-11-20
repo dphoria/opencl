@@ -32,51 +32,47 @@ auto vector_add_3_4() -> bool
     // guaranteed to have at least 1 device in platform.
     // just going to use the first one
     cl_device_id device = platformIter->second[0];
-    cl_context context = createContext(platformIter->first,
-                                       std::vector<cl_device_id>(1, device));
-    if (context == nullptr) {
+    std::shared_ptr<d_ocl_context> contextManager = createContext(
+        platformIter->first, std::vector<cl_device_id>(1, device));
+    if (contextManager->context == nullptr) {
         std::cerr << "error creating gpu device context" << std::endl;
         return false;
     }
     // to communicate with device
-    cl_command_queue cmdQueue = createCmdQueue(device, context);
+    cl_command_queue cmdQueue = createCmdQueue(device, contextManager->context);
     if (cmdQueue == nullptr) {
         std::cerr << "error creating gpu device cmd queue" << std::endl;
-        clReleaseContext(context);
         return false;
     }
 
     // device-side memory
     // initialize with data from host-side vector
-    cl_mem deviceA = clCreateBuffer(context,
+    cl_mem deviceA = clCreateBuffer(contextManager->context,
                                     CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY
                                         | CL_MEM_COPY_HOST_PTR,
                                     dataSize,
                                     hostA.data(),
                                     nullptr);
-    cl_mem deviceB = clCreateBuffer(context,
+    cl_mem deviceB = clCreateBuffer(contextManager->context,
                                     CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY
                                         | CL_MEM_COPY_HOST_PTR,
                                     dataSize,
                                     hostB.data(),
                                     nullptr);
     // to get answer from device to host accessible memory
-    cl_mem deviceC = clCreateBuffer(context,
+    cl_mem deviceC = clCreateBuffer(contextManager->context,
                                     CL_MEM_WRITE_ONLY | CL_MEM_HOST_READ_ONLY,
                                     dataSize,
                                     nullptr,
                                     nullptr);
     if (deviceA == nullptr || deviceB == nullptr || deviceC == nullptr) {
-        clReleaseContext(context);
         std::cerr << "error creating device-side buffer" << std::endl;
         return false;
     }
 
-    // TODO: queue command to set up buffer
-    // read the kernel source from *.c file
+    // TODO: read the kernel source from *.c file
     // run kernel on device
     // get answer from device to host memory
 
-    clReleaseContext(context);
     return true;
 }
