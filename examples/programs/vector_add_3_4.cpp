@@ -107,15 +107,21 @@ auto vector_add_3_4() -> bool
         || !kernel
         // arguments for
         // vector_add(__global int* A, __global int* B, __global int* C)
-        || clSetKernelArg(
-               kernel->openclObject, 0, sizeof(cl_mem), &deviceA->openclObject)
-               != CL_SUCCESS
-        || clSetKernelArg(
-               kernel->openclObject, 1, sizeof(cl_mem), &deviceB->openclObject)
-               != CL_SUCCESS
-        || clSetKernelArg(
-               kernel->openclObject, 2, sizeof(cl_mem), &deviceC->openclObject)
-               != CL_SUCCESS) {
+        || !d_ocl_check_run("clSetKernelArg",
+                            clSetKernelArg(kernel->openclObject,
+                                           0,
+                                           sizeof(cl_mem),
+                                           &deviceA->openclObject))
+        || !d_ocl_check_run("clSetKernelArg",
+                            clSetKernelArg(kernel->openclObject,
+                                           1,
+                                           sizeof(cl_mem),
+                                           &deviceB->openclObject))
+        || !d_ocl_check_run("clSetKernelArg",
+                            clSetKernelArg(kernel->openclObject,
+                                           2,
+                                           sizeof(cl_mem),
+                                           &deviceC->openclObject))) {
         std::cerr << "error creating program kernel" << std::endl;
         return false;
     }
@@ -123,27 +129,26 @@ auto vector_add_3_4() -> bool
     cl_event kernel_event;
     // queue the kernel onto the device
     // read the answer into host buffer after kernel is finished
-    if (clEnqueueNDRangeKernel(cmdQueue->openclObject,
-                               kernel->openclObject,
-                               1,
-                               nullptr,
-                               &numElements,
-                               nullptr,
-                               0,
-                               nullptr,
-                               &kernel_event)
-            != CL_SUCCESS
-        || clEnqueueReadBuffer(cmdQueue->openclObject,
-                               deviceC->openclObject,
-                               CL_TRUE,
-                               0,
-                               dataSize,
-                               hostC.data(),
-                               1,
-                               &kernel_event,
-                               nullptr)
-               != CL_SUCCESS) {
-        std::cerr << "error running program kernel" << std::endl;
+    if (!d_ocl_check_run("clEnqueueNDRangeKernel",
+                         clEnqueueNDRangeKernel(cmdQueue->openclObject,
+                                                kernel->openclObject,
+                                                1,
+                                                nullptr,
+                                                &numElements,
+                                                nullptr,
+                                                0,
+                                                nullptr,
+                                                &kernel_event))
+        || !d_ocl_check_run("clEnqueueReadBuffer",
+                            clEnqueueReadBuffer(cmdQueue->openclObject,
+                                                deviceC->openclObject,
+                                                CL_TRUE,
+                                                0,
+                                                dataSize,
+                                                hostC.data(),
+                                                1,
+                                                &kernel_event,
+                                                nullptr))) {
         return false;
     }
 

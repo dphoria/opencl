@@ -8,6 +8,11 @@
 #include <unordered_map>
 #include <vector>
 
+// helper to return true if funcRetval == CL_SUCCESS
+// else print funcRetval and return false
+auto D_OCL_API d_ocl_check_run(const std::string& funcName, cl_int funcRetval)
+    -> bool;
+
 auto D_OCL_API gpuPlatforms() -> std::vector<cl_platform_id>;
 auto D_OCL_API gpuDevices(cl_platform_id platform) -> std::vector<cl_device_id>;
 // every vector<cl_device_id> is guaranteed to have at least 1 cl_device_id

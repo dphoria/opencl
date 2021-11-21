@@ -11,17 +11,30 @@ static std::mutex g_mutex;
 // all-purpose buffer e.g. for file i/o
 static std::vector<char> g_scratchBuffer;
 
+auto d_ocl_check_run(const std::string& funcName, cl_int funcRetval) -> bool
+{
+    if (funcRetval == CL_SUCCESS) {
+        return true;
+    }
+
+    std::cerr << funcName << "() -> " << funcRetval << std::endl;
+    return false;
+}
+
 auto gpuPlatforms() -> std::vector<cl_platform_id>
 {
     // find available platform count first
     cl_uint numPlatforms;
-    if (clGetPlatformIDs(0, nullptr, &numPlatforms) != CL_SUCCESS) {
+    if (!d_ocl_check_run("clGetPlatformIDs",
+                         clGetPlatformIDs(0, nullptr, &numPlatforms))) {
         numPlatforms = 0;
     }
 
     std::vector<cl_platform_id> platforms(numPlatforms);
-    if (clGetPlatformIDs(numPlatforms, platforms.data(), nullptr)
-        != CL_SUCCESS) {
+    if (numPlatforms == 0
+        || !d_ocl_check_run(
+            "clGetPlatformIDs",
+            clGetPlatformIDs(numPlatforms, platforms.data(), nullptr))) {
         platforms.clear();
     }
 
@@ -31,15 +44,21 @@ auto gpuPlatforms() -> std::vector<cl_platform_id>
 auto gpuDevices(cl_platform_id platform) -> std::vector<cl_device_id>
 {
     cl_uint numDevices;
-    if (clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 0, nullptr, &numDevices)
-        != CL_SUCCESS) {
+    if (!d_ocl_check_run(
+            "clGetDeviceIDs",
+            clGetDeviceIDs(
+                platform, CL_DEVICE_TYPE_GPU, 0, nullptr, &numDevices))) {
         numDevices = 0;
     }
 
     std::vector<cl_device_id> devices(numDevices);
-    if (clGetDeviceIDs(
-            platform, CL_DEVICE_TYPE_GPU, numDevices, devices.data(), nullptr)
-        != CL_SUCCESS) {
+    if (numDevices == 0
+        || !d_ocl_check_run("clGetDeviceIDs",
+                            clGetDeviceIDs(platform,
+                                           CL_DEVICE_TYPE_GPU,
+                                           numDevices,
+                                           devices.data(),
+                                           nullptr))) {
         devices.clear();
     }
 
@@ -154,9 +173,13 @@ auto createProgram(cl_context context, const std::string& filePath)
     }
 
     // compile and link the program
-    if (clBuildProgram(
-            program->openclObject, 0, nullptr, nullptr, nullptr, nullptr)
-        != CL_SUCCESS) {
+    if (!d_ocl_check_run("clBuildProgram",
+                         clBuildProgram(program->openclObject,
+                                        0,
+                                        nullptr,
+                                        nullptr,
+                                        nullptr,
+                                        nullptr))) {
         // clReleaseProgram if build failed
         program.reset();
     }
@@ -173,18 +196,19 @@ auto information(cl_device_id device,
     // first find out value string length
     size_t requiredSize = 0;
     // requiredSize will be set to value string length
-    if (clGetDeviceInfo(
-            device, param_name, 0, param_value.data(), &requiredSize)
-            != CL_SUCCESS
-        || !requiredSize) {
+    if (!d_ocl_check_run(
+            "clGetDeviceInfo",
+            clGetDeviceInfo(
+                device, param_name, 0, param_value.data(), &requiredSize))) {
         return false;
     }
 
     // add 1 for safety, like null-termination
     param_value.resize(requiredSize + 1, default_value);
-    return (clGetDeviceInfo(
-                device, param_name, requiredSize, param_value.data(), nullptr)
-            == CL_SUCCESS);
+    return d_ocl_check_run(
+        "clGetDeviceInfo",
+        clGetDeviceInfo(
+            device, param_name, requiredSize, param_value.data(), nullptr));
 };
 
 auto description(cl_device_id device) -> std::string
