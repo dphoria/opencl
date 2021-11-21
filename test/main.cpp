@@ -22,6 +22,8 @@ auto main(int argc, char** argv) -> int
         }
     }
 
+    int retval = 0;
+
     // ----
     // 3.4-vector-add : begin
     // ----
@@ -40,6 +42,7 @@ auto main(int argc, char** argv) -> int
         if ((*funcIter)()) {
             std::cout << *nameIter << " : pass" << std::endl;
         } else {
+            retval = 1;
             std::cerr << *nameIter << " : fail" << std::endl;
         }
         std::cout << "----" << std::endl;
@@ -48,5 +51,5 @@ auto main(int argc, char** argv) -> int
         funcIter++;
     }
 
-    return 0;
+    return retval;
 }
