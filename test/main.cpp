@@ -1,5 +1,5 @@
 #include "../core/d_ocl.h"
-#include "../examples/programs/programs_defines.h"
+#include "../examples/d_ocl_examples_defines.h"
 #include <iostream>
 
 auto main(int argc, char** argv) -> int
@@ -29,10 +29,10 @@ auto main(int argc, char** argv) -> int
     // 3.4-vector-add : fail
     // ----
 
-    auto nameIter = g_testNames.cbegin();
-    auto funcIter = g_testFunctions.cbegin();
-    while (nameIter != g_testNames.cend()
-           && funcIter != g_testFunctions.cend()) {
+    auto nameIter = g_exampleNames.cbegin();
+    auto funcIter = g_exampleFunctions.cbegin();
+    while (nameIter != g_exampleNames.cend()
+           && funcIter != g_exampleFunctions.cend()) {
         std::cout << "----" << std::endl
                   << *nameIter << " : begin " << std::endl
                   << "----" << std::endl;

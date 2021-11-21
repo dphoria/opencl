@@ -113,6 +113,7 @@ auto createProgram(cl_context context, const std::string& filePath)
     if (g_scratchBuffer.size() < bufferSize) {
         g_scratchBuffer.resize(bufferSize);
     }
+    std::memset(g_scratchBuffer.data(), '\0', bufferSize);
 
     std::vector<const char*> lines;
     std::vector<size_t> lengths;

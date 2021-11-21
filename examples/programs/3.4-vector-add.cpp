@@ -85,11 +85,13 @@ auto vector_add_3_4() -> bool
     // compile and link the program
     std::shared_ptr<d_ocl_manager<cl_program>> program = createProgram(
         context->openclObject, PROGRAM_SRC_ROOT "/" PROG_VECTOR_ADD_3_4 ".c");
+
     std::shared_ptr<d_ocl_manager<cl_kernel>> kernel;
     if (program) {
         // make a kernel out of the program
-        kernel = std::make_shared<d_ocl_manager<cl_kernel>>(
-            clCreateKernel(program->openclObject, PROG_VECTOR_ADD_3_4, nullptr),
+        kernel = d_ocl_manager<cl_kernel>::makeShared(
+            // specify the kernel name, decorated with __kernel in the source
+            clCreateKernel(program->openclObject, "vector_add", nullptr),
             &clReleaseKernel);
     }
 
@@ -149,5 +151,5 @@ auto vector_add_3_4() -> bool
     return true;
 }
 
-// append to g_testNames and g_testFunctions
+// append to g_exampleNames and g_exampleFunctions
 REGISTER_TEST_PROG(vector_add_3_4, PROG_VECTOR_ADD_3_4, &vector_add_3_4)
