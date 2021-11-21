@@ -3,7 +3,7 @@
 
 #include "../d_ocl_examples_defines.h"
 
-#define PROG_VECTOR_ADD_3_4 "3.4-vector-add"
+#define PROG_VECTOR_ADD_3_4 "3.4_vector_add"
 
 // REGISTER_TEST_PROG(vector_add_3_4, PROG_VECTOR_ADD_3_4, &vector_add_3_4)
 #define REGISTER_TEST_PROG(a, b, c)                                            \

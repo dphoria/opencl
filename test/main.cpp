@@ -25,10 +25,10 @@ auto main(int argc, char** argv) -> int
     int retval = 0;
 
     // ----
-    // 3.4-vector-add : begin
+    // 3.4_vector_add : begin
     // ----
     // ...
-    // 3.4-vector-add : fail
+    // 3.4_vector_add : fail
     // ----
 
     auto nameIter = g_exampleNames.cbegin();
