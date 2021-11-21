@@ -1,5 +1,5 @@
 #include "../core/d_ocl.h"
-#include "../examples/d_ocl_examples_defines.h"
+#include "../examples/d_ocl_examples.h"
 #include <iostream>
 
 auto main(int argc, char** argv) -> int

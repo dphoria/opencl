@@ -2,7 +2,7 @@
 add_compile_definitions(PROGRAM_SRC_ROOT="${CMAKE_CURRENT_SOURCE_DIR}/program-sources")
 set(SOURCES
     d_ocl_examples.cpp
-    d_ocl_examples_defines.h
+    d_ocl_examples.h
     programs/3.4_vector_add.cpp
     programs/3.4_vector_add.h
     programs/programs_defines.h

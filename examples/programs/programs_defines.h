@@ -1,7 +1,7 @@
 #ifndef PROGRAMS_DEFINES_H
 #define PROGRAMS_DEFINES_H
 
-#include "../d_ocl_examples_defines.h"
+#include "../d_ocl_examples.h"
 
 #define PROG_VECTOR_ADD_3_4 "3.4_vector_add"
 
