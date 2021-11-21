@@ -17,5 +17,5 @@ target_compile_definitions(d-ocl-examples
     PRIVATE EXPORT_D_OCL_EXAMPLES
 )
 
-# save source file paths for clang-format.py
+# save source file paths for clang_format.py
 setup_clang_format(d-ocl-examples ${SOURCES})

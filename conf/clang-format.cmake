@@ -14,7 +14,7 @@ endmacro()
 add_custom_target(check-clang-format)
 add_custom_command(
     TARGET check-clang-format PRE_BUILD
-    COMMAND python scripts/clang-format.py --recurse
+    COMMAND python scripts/clang_format.py --recurse
     WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
 )
 
@@ -23,7 +23,7 @@ add_custom_target(apply-clang-format)
 add_custom_command(
     TARGET apply-clang-format PRE_BUILD
     # apply diff in-place
-    COMMAND python scripts/clang-format.py --recurse --write
+    COMMAND python scripts/clang_format.py --recurse --write
     WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
 )
 

@@ -12,5 +12,5 @@ target_compile_definitions(d-ocl-core
     PRIVATE EXPORT_D_OCL_CORE
 )
 
-# save source file paths for clang-format.py
+# save source file paths for clang_format.py
 setup_clang_format(d-ocl-core ${SOURCES})
