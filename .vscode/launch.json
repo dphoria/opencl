@@ -8,7 +8,7 @@
             "name": "clang++ - Build and debug active file",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/${relativeFileDirname}/test-opencl",
+            "program": "${workspaceFolder}/build/test/test-opencl",
             "args": [],
             "stopAtEntry": true,
             "cwd": "${workspaceFolder}",
