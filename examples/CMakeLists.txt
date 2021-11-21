@@ -3,8 +3,8 @@ add_compile_definitions(PROGRAM_SRC_ROOT="${CMAKE_CURRENT_SOURCE_DIR}/program-so
 set(SOURCES
     d_ocl_examples.cpp
     d_ocl_examples.h
-    programs/3.4_vector_add.cpp
-    programs/3.4_vector_add.h
+    programs/vector_add_3_4.cpp
+    programs/vector_add_3_4.h
     programs/programs_defines.h
 )
 add_library(d-ocl-examples SHARED ${SOURCES})

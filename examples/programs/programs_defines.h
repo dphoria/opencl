@@ -3,17 +3,18 @@
 
 #include "../d_ocl_examples.h"
 
-#define PROG_VECTOR_ADD_3_4 "3.4_vector_add"
+#define EX_NAME_VECTOR_ADD_3_4 "vector_add_3_4"
+#define EX_KERN_VECTOR_ADD_3_4 vector_add_3_4
 
-// REGISTER_TEST_PROG(vector_add_3_4, PROG_VECTOR_ADD_3_4, &vector_add_3_4)
-#define REGISTER_TEST_PROG(a, b, c)                                            \
+// D_OCL_REGISTER_EXAMPLE(EX_KERN_VECTOR_ADD_3_4, EX_NAME_VECTOR_ADD_3_4)
+#define D_OCL_REGISTER_EXAMPLE(a, b)                                           \
     static struct Register_##a                                                 \
     {                                                                          \
         Register_##a()                                                         \
         {                                                                      \
+            g_exampleFunctions.emplace_back(&a);                               \
             g_exampleNames.emplace_back(b);                                    \
-            g_exampleFunctions.emplace_back(c);                                \
         }                                                                      \
-    } _Register_##a_;
+    } _Register_##a;
 
 #endif

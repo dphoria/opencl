@@ -1,5 +1,5 @@
 __kernel
-void vector_add(__global int* A, __global int* B, __global int* C)
+void vector_add_3_4(__global int* A, __global int* B, __global int* C)
 {
     // partitioned such that work item id = vector index
     int idx = get_global_id(0);

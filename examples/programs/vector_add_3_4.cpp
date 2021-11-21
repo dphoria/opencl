@@ -1,4 +1,4 @@
-#include "3.4_vector_add.h"
+#include "vector_add_3_4.h"
 #include "../../core/d_ocl.h"
 #include "programs_defines.h"
 #include <iostream>
@@ -9,7 +9,7 @@ auto vector_add_3_4() -> bool
     // number of items in each array
     const size_t numElements = 2048;
     // data size in bytes
-    size_t dataSize = sizeof(int) * numElements;
+    const size_t dataSize = sizeof(int) * numElements;
 
     // host buffers
     // input
@@ -83,15 +83,17 @@ auto vector_add_3_4() -> bool
     }
 
     // compile and link the program
-    std::shared_ptr<d_ocl_manager<cl_program>> program = createProgram(
-        context->openclObject, PROGRAM_SRC_ROOT "/" PROG_VECTOR_ADD_3_4 ".c");
+    std::shared_ptr<d_ocl_manager<cl_program>> program
+        = createProgram(context->openclObject,
+                        PROGRAM_SRC_ROOT "/" EX_NAME_VECTOR_ADD_3_4 ".c");
 
     std::shared_ptr<d_ocl_manager<cl_kernel>> kernel;
     if (program) {
         // make a kernel out of the program
         kernel = d_ocl_manager<cl_kernel>::makeShared(
             // specify the kernel name, decorated with __kernel in the source
-            clCreateKernel(program->openclObject, "vector_add", nullptr),
+            clCreateKernel(
+                program->openclObject, EX_NAME_VECTOR_ADD_3_4, nullptr),
             &clReleaseKernel);
     }
 
@@ -152,4 +154,4 @@ auto vector_add_3_4() -> bool
 }
 
 // append to g_exampleNames and g_exampleFunctions
-REGISTER_TEST_PROG(vector_add_3_4, PROG_VECTOR_ADD_3_4, &vector_add_3_4)
+D_OCL_REGISTER_EXAMPLE(EX_KERN_VECTOR_ADD_3_4, EX_NAME_VECTOR_ADD_3_4)
