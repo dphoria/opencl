@@ -1,10 +1,10 @@
-#ifndef D_OCL_PLATFORM_DEFS_H
-#define D_OCL_PLATFORM_DEFS_H
+#ifndef D_OCL_DEFINES_H
+#define D_OCL_DEFINES_H
 
 #include <CL/cl.h>
 #include <memory>
 
-#ifdef EXPORT_D_OCL_PLATFORM
+#ifdef EXPORT_D_OCL_CORE
 #define D_OCL_API __attribute__((visibility("default")))
 #else
 #define D_OCL_API
@@ -44,4 +44,4 @@ struct d_ocl_manager
     opencl_release_func releaseFunc{nullptr};
 };
 
-#endif // D_OCL_PLATFORM_DEFS_H
+#endif // D_OCL_DEFINES_H

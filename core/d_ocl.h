@@ -1,5 +1,5 @@
-#ifndef D_OCL_PLATFORM_H
-#define D_OCL_PLATFORM_H
+#ifndef D_OCL_H
+#define D_OCL_H
 
 #include "d_ocl_defines.h"
 #include <CL/cl.h>
@@ -31,4 +31,4 @@ auto D_OCL_API createProgram(cl_context context, const std::string& filePath)
 // generate human-readable description
 auto D_OCL_API description(cl_device_id device) -> std::string;
 
-#endif // D_OCL_PLATFORM_H
+#endif // D_OCL_H

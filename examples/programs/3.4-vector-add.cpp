@@ -1,6 +1,6 @@
 #include "3.4-vector-add.h"
 #include "../../core/d_ocl.h"
-#include "programs-defines.h"
+#include "programs_defines.h"
 #include <iostream>
 #include <vector>
 

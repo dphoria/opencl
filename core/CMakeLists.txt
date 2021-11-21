@@ -9,7 +9,7 @@ target_link_libraries(d-ocl-core
     ${OpenCL_LIBRARIES}
 )
 target_compile_definitions(d-ocl-core
-    PRIVATE EXPORT_D_OCL_PLATFORM
+    PRIVATE EXPORT_D_OCL_CORE
 )
 
 # save source file paths for clang-format.py
