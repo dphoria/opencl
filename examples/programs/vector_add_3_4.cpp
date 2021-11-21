@@ -2,6 +2,7 @@
 #include "../../core/d_ocl.h"
 #include "programs_defines.h"
 #include <iostream>
+#include <random>
 #include <vector>
 
 auto vector_add_3_4() -> bool
@@ -19,8 +20,13 @@ auto vector_add_3_4() -> bool
     std::vector<int> hostC(numElements);
 
     // input data init
+    std::random_device randDevice;
+    std::default_random_engine randEngine(randDevice());
+    std::uniform_int_distribution<int> randDistribution(
+        std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
     for (int i = 0; i < hostA.size(); i++) {
-        hostA[i] = hostB[i] = i;
+        hostA[i] = randDistribution(randEngine);
+        hostB[i] = randDistribution(randEngine);
     }
 
     std::unordered_map<cl_platform_id, std::vector<cl_device_id>>
