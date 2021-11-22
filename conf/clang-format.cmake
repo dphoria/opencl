@@ -17,6 +17,8 @@ add_custom_command(
     COMMAND python scripts/clang_format.py --recurse
     WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
 )
+# also show clang-tidy suggestions when showing clang-format diff
+add_dependencies(check-clang-format check-clang-tidy)
 
 # build this to apply clang-format
 add_custom_target(apply-clang-format)
@@ -26,6 +28,7 @@ add_custom_command(
     COMMAND python scripts/clang_format.py --recurse --write
     WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
 )
+add_dependencies(apply-clang-format apply-clang-tidy)
 
 # {ARGN} are expected to be project build targets
 macro(make_clang_format_target)

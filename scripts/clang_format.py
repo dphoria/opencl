@@ -1,14 +1,11 @@
 from argparse import ArgumentParser
 from difflib import diff_bytes, unified_diff
 from pathlib import Path
-from typing import Generator, List, Optional
+from typing import Generator, Optional
 from io import FileIO, BytesIO
+from clang_helper import find_src_files
 import subprocess as sp
-import os
 import sys
-
-
-CLANG_FORMAT_SRC_FILES = "clang-format-srcs"
 
 
 def clang_format_corrections(src_path: Path) -> Optional[bytes]:
@@ -45,31 +42,6 @@ def get_diff(src_path: Path, to_bytes: bytes) -> Optional[Generator]:
             fromfile=bytes(src_path),
             tofile=bytes(src_path) + b".clang-format",
         )
-
-
-def find_src_files(recurse: bool) -> List[str]:
-    listing_files: List[Path] = []
-    with os.scandir(os.curdir) as scan:
-        for i in scan:
-            if i.name == CLANG_FORMAT_SRC_FILES:
-                # always read clang-format-srcs in current directory
-                listing_files.append(i.path)
-            # find clang-format-srcs in any subdirectory
-            elif recurse and i.is_dir():
-                for walk in os.walk(i.path):
-                    if CLANG_FORMAT_SRC_FILES in walk[-1]:
-                        listing_files.append(
-                            os.path.join(walk[0], CLANG_FORMAT_SRC_FILES)
-                        )
-
-    src_files: List[str] = []
-    # each clang-format-srcs has source file paths per line
-    for listing in listing_files:
-        with open(listing) as file:
-            for line in file:
-                src_files.append(line.strip())
-
-    return src_files
 
 
 if __name__ == "__main__":

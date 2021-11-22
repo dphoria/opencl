@@ -3,8 +3,22 @@ find_file(CLANG_TIDY_PATH
 )
 
 if (EXISTS "${CLANG_TIDY_PATH}")
-    # use .clang-tidy
-    set(CMAKE_CXX_CLANG_TIDY clang-tidy -p "${CMAKE_SOURCE_DIR}/build")
+    # build this to show clang-tidy suggestions
+    add_custom_target(check-clang-tidy)
+    add_custom_command(
+        TARGET check-clang-tidy PRE_BUILD
+        COMMAND python scripts/clang_tidy.py --recurse -p "${CMAKE_SOURCE_DIR}/build"
+        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+    )
+
+    # build this to call clang-tidy --fix
+    add_custom_target(apply-clang-tidy)
+    add_custom_command(
+        TARGET apply-clang-tidy PRE_BUILD
+        # write corrections to file
+        COMMAND python scripts/clang_tidy.py --recurse --write -p "${CMAKE_SOURCE_DIR}/build"
+        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+    )
 else()
     message("clang-tidy not found")
 endif()
