@@ -24,9 +24,7 @@ def clang_tidy(src_path: Path, *nargs) -> None:
         print(src_path, "is not a file", file=stderr)
         return
 
-    result = sp.run(
-        ("clang-tidy", *nargs, src_path), stdout=sp.PIPE, stderr=sp.PIPE
-    )
+    result = sp.run(("clang-tidy", *nargs, src_path), stdout=sp.PIPE, stderr=sp.PIPE)
     if result.returncode != 0:
         print(
             f"clang-tidy {' '.join(nargs)} {src_path} failed:\n"
@@ -44,18 +42,16 @@ if __name__ == "__main__":
         description="run clang-tidy on files listed in clang-format-srcs"
     )
     argp.add_argument(
-        "-r", "--recurse",
-        action="store_true",
-        help="recurse into subdirectories",
+        "-r", "--recurse", action="store_true", help="recurse into subdirectories",
     )
     argp.add_argument(
-        "-w", "--write",
+        "-w",
+        "--write",
         action="store_true",
         help="write clang-tidy suggestions to source files",
     )
     argp.add_argument(
-        "-p",
-        help="build directory containing compile_commands.json",
+        "-p", help="build directory containing compile_commands.json",
     )
     args = argp.parse_args()
 

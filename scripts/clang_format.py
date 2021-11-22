@@ -24,9 +24,7 @@ def clang_format_corrections(src_path: Path) -> Optional[bytes]:
 def clang_format_fix(src_path: Path) -> bool:
     return (
         src_path.is_file()
-        and sp.run(
-            ("clang-format", "-style=file", "-i", src_path)
-        ).returncode == 0
+        and sp.run(("clang-format", "-style=file", "-i", src_path)).returncode == 0
     )
 
 
@@ -49,12 +47,11 @@ if __name__ == "__main__":
         description="show diff between original and clang-format output"
     )
     argp.add_argument(
-        "-r", "--recurse",
-        action="store_true",
-        help="recurse into subdirectories",
+        "-r", "--recurse", action="store_true", help="recurse into subdirectories",
     )
     argp.add_argument(
-        "-w", "--write",
+        "-w",
+        "--write",
         action="store_true",
         help="write clang-format suggestions to source files",
     )

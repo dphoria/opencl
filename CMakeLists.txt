@@ -12,6 +12,7 @@ add_compile_definitions(CL_TARGET_OPENCL_VERSION=200)
 
 include("conf/clang-tidy.cmake")
 include("conf/clang-format.cmake")
+include("conf/python-lint.cmake")
 
 include_directories(${OpenCL_INCLUDE_DIRS})
 add_subdirectory(core)
