@@ -1,2 +1,2 @@
-Checks: '-checks=-*,clang-analyzer-*,modernize-*,readability-*'
+Checks: '-checks=-*,clang-analyzer-*,modernize-*,-modernize-avoid-c-arrays,readability-*,-readability-magic-numbers'
 HeaderFilterRegex: .*

@@ -1,6 +1,7 @@
 AllowAllArgumentsOnNextLine: true
 AllowAllConstructorInitializersOnNextLine: true
 AllowAllParametersOfDeclarationOnNextLine: true
+AllowShortBlocksOnASingleLine: Empty
 AlwaysBreakTemplateDeclarations: Yes
 BasedOnStyle: llvm
 BinPackArguments: false
