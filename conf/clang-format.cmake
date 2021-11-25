@@ -20,7 +20,7 @@ add_custom_command(
 # also show clang-tidy suggestions when showing clang-format diff
 add_dependencies(check-clang-format
     check-clang-tidy
-    check-python-lint
+    check-python-format
 )
 
 # build this to apply clang-format
