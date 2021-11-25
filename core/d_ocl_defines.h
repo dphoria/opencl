@@ -10,6 +10,9 @@
 #define D_OCL_API
 #endif
 
+// file extension for operncl kernel source files
+#define D_OCL_KERN_EXT "cl"
+
 // ensure release when finished with open resource like cl_context
 template<typename T>
 struct d_ocl_manager

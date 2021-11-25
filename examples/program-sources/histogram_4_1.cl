@@ -21,7 +21,7 @@ void histogram_4_1(__global int* data, int numData, __global int* histogram)
 
     /*
     globalId is unique across all work-items
-    i.e. each item in data is read exactly once
+    i.e. each item in data is counted exactly once
     */
     for (int i = globalId; i < numData; i += get_global_size(0)) {
         /*

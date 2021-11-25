@@ -89,9 +89,9 @@ auto vector_add_3_4() -> bool
     }
 
     // compile and link the program
-    std::shared_ptr<d_ocl_manager<cl_program>> program
-        = createProgram(context->openclObject,
-                        PROGRAM_SRC_ROOT "/" EX_NAME_VECTOR_ADD_3_4 ".c");
+    std::shared_ptr<d_ocl_manager<cl_program>> program = createProgram(
+        context->openclObject,
+        PROGRAM_SRC_ROOT "/" EX_NAME_VECTOR_ADD_3_4 "." D_OCL_KERN_EXT);
 
     std::shared_ptr<d_ocl_manager<cl_kernel>> kernel;
     if (program) {
