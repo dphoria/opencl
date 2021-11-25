@@ -5,8 +5,19 @@
 #include <random>
 #include <vector>
 
+#define EX_NAME_VECTOR_ADD_3_4 "vector_add_3_4"
+#define EX_KERN_VECTOR_ADD_3_4 vector_add_3_4
+
 auto vector_add_3_4() -> bool
 {
+    // gpu context and command queue for the first gpu device found
+    d_ocl::basic_palette palette;
+    if (!d_ocl::createBasicPalette(palette)) {
+        std::cerr << "error creating gpu context and command queue"
+                  << std::endl;
+        return false;
+    }
+
     // number of items in each array
     const size_t numElements = 2048;
     // data size in bytes
@@ -24,41 +35,16 @@ auto vector_add_3_4() -> bool
     std::default_random_engine randEngine(randDevice());
     std::uniform_int_distribution<int> randDistribution(
         std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
-    for (int i = 0; i < hostA.size(); i++) {
+    for (int i = 0; i < numElements; i++) {
         hostA[i] = randDistribution(randEngine);
         hostB[i] = randDistribution(randEngine);
-    }
-
-    std::unordered_map<cl_platform_id, std::vector<cl_device_id>>
-        platformDevices = gpuPlatformDevices();
-    if (platformDevices.empty()) {
-        std::cerr << "no gpu device found" << std::endl;
-        return false;
-    }
-    const auto platformIter = platformDevices.cbegin();
-    // guaranteed to have at least 1 device in platform.
-    // just going to use the first one
-    cl_device_id device = platformIter->second[0];
-
-    std::shared_ptr<d_ocl_manager<cl_context>> context = createContext(
-        platformIter->first, std::vector<cl_device_id>(1, device));
-    if (!context) {
-        std::cerr << "error creating gpu device context" << std::endl;
-        return false;
-    }
-    // to communicate with device
-    std::shared_ptr<d_ocl_manager<cl_command_queue>> cmdQueue
-        = createCmdQueue(device, context->openclObject);
-    if (!cmdQueue) {
-        std::cerr << "error creating gpu device cmd queue" << std::endl;
-        return false;
     }
 
     // device-side memory
     // initialize with data from host-side vector
     std::shared_ptr<d_ocl_manager<cl_mem>> deviceA
         = d_ocl_manager<cl_mem>::makeShared(
-            clCreateBuffer(context->openclObject,
+            clCreateBuffer(palette.context->openclObject,
                            CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY
                                | CL_MEM_COPY_HOST_PTR,
                            dataSize,
@@ -67,7 +53,7 @@ auto vector_add_3_4() -> bool
             &clReleaseMemObject);
     std::shared_ptr<d_ocl_manager<cl_mem>> deviceB
         = d_ocl_manager<cl_mem>::makeShared(
-            clCreateBuffer(context->openclObject,
+            clCreateBuffer(palette.context->openclObject,
                            CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY
                                | CL_MEM_COPY_HOST_PTR,
                            dataSize,
@@ -77,7 +63,7 @@ auto vector_add_3_4() -> bool
     // to get answer from device to host accessible memory
     std::shared_ptr<d_ocl_manager<cl_mem>> deviceC
         = d_ocl_manager<cl_mem>::makeShared(
-            clCreateBuffer(context->openclObject,
+            clCreateBuffer(palette.context->openclObject,
                            CL_MEM_WRITE_ONLY | CL_MEM_HOST_READ_ONLY,
                            dataSize,
                            nullptr,
@@ -89,9 +75,9 @@ auto vector_add_3_4() -> bool
     }
 
     // compile and link the program
-    std::shared_ptr<d_ocl_manager<cl_program>> program = createProgram(
-        context->openclObject,
-        PROGRAM_SRC_ROOT "/" EX_NAME_VECTOR_ADD_3_4 "." D_OCL_KERN_EXT);
+    std::shared_ptr<d_ocl_manager<cl_program>> program = d_ocl::createProgram(
+        palette.context->openclObject,
+        EX_RESOURCE_ROOT "/" EX_NAME_VECTOR_ADD_3_4 "." D_OCL_KERN_EXT);
 
     std::shared_ptr<d_ocl_manager<cl_kernel>> kernel;
     if (program) {
@@ -107,21 +93,21 @@ auto vector_add_3_4() -> bool
         || !kernel
         // arguments for
         // vector_add(__global int* A, __global int* B, __global int* C)
-        || !d_ocl_check_run("clSetKernelArg",
-                            clSetKernelArg(kernel->openclObject,
-                                           0,
-                                           sizeof(cl_mem),
-                                           &deviceA->openclObject))
-        || !d_ocl_check_run("clSetKernelArg",
-                            clSetKernelArg(kernel->openclObject,
-                                           1,
-                                           sizeof(cl_mem),
-                                           &deviceB->openclObject))
-        || !d_ocl_check_run("clSetKernelArg",
-                            clSetKernelArg(kernel->openclObject,
-                                           2,
-                                           sizeof(cl_mem),
-                                           &deviceC->openclObject))) {
+        || !d_ocl::check_run("clSetKernelArg",
+                             clSetKernelArg(kernel->openclObject,
+                                            0,
+                                            sizeof(cl_mem),
+                                            &deviceA->openclObject))
+        || !d_ocl::check_run("clSetKernelArg",
+                             clSetKernelArg(kernel->openclObject,
+                                            1,
+                                            sizeof(cl_mem),
+                                            &deviceB->openclObject))
+        || !d_ocl::check_run("clSetKernelArg",
+                             clSetKernelArg(kernel->openclObject,
+                                            2,
+                                            sizeof(cl_mem),
+                                            &deviceC->openclObject))) {
         std::cerr << "error creating program kernel" << std::endl;
         return false;
     }
@@ -129,26 +115,26 @@ auto vector_add_3_4() -> bool
     cl_event kernel_event;
     // queue the kernel onto the device
     // read the answer into host buffer after kernel is finished
-    if (!d_ocl_check_run("clEnqueueNDRangeKernel",
-                         clEnqueueNDRangeKernel(cmdQueue->openclObject,
-                                                kernel->openclObject,
-                                                1,
-                                                nullptr,
-                                                &numElements,
-                                                nullptr,
-                                                0,
-                                                nullptr,
-                                                &kernel_event))
-        || !d_ocl_check_run("clEnqueueReadBuffer",
-                            clEnqueueReadBuffer(cmdQueue->openclObject,
-                                                deviceC->openclObject,
-                                                CL_TRUE,
-                                                0,
-                                                dataSize,
-                                                hostC.data(),
-                                                1,
-                                                &kernel_event,
-                                                nullptr))) {
+    if (!d_ocl::check_run("clEnqueueNDRangeKernel",
+                          clEnqueueNDRangeKernel(palette.cmdQueue->openclObject,
+                                                 kernel->openclObject,
+                                                 1,
+                                                 nullptr,
+                                                 &numElements,
+                                                 nullptr,
+                                                 0,
+                                                 nullptr,
+                                                 &kernel_event))
+        || !d_ocl::check_run("clEnqueueReadBuffer",
+                             clEnqueueReadBuffer(palette.cmdQueue->openclObject,
+                                                 deviceC->openclObject,
+                                                 CL_TRUE,
+                                                 0,
+                                                 dataSize,
+                                                 hostC.data(),
+                                                 1,
+                                                 &kernel_event,
+                                                 nullptr))) {
         return false;
     }
 

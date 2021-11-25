@@ -1,16 +1,26 @@
+find_package(OpenCV 4.2 REQUIRED imgcodecs)
+
 # kernel source files here
-add_compile_definitions(PROGRAM_SRC_ROOT="${CMAKE_CURRENT_SOURCE_DIR}/program-sources")
+add_compile_definitions(EX_RESOURCE_ROOT="${CMAKE_CURRENT_SOURCE_DIR}/res")
 set(SOURCES
     d_ocl_examples.cpp
     d_ocl_examples.h
-    programs/vector_add_3_4.cpp
-    programs/vector_add_3_4.h
-    programs/programs_defines.h
 )
+# add all source files in programs/
+file(GLOB_RECURSE EX_SRC_FILES FOLLOW_SYMLINKS                  # visit subdirectories that are symlinks
+    RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" CONFIGURE_DEPENDS    # regenerate build system when file list changes
+    programs/*.cpp
+    programs/*.h
+)
+
+list(APPEND SOURCES ${EX_SRC_FILES})
 add_library(d-ocl-examples SHARED ${SOURCES})
+
+include_directories("${OpenCV_INCLUDE_DIRS}")
 
 target_link_libraries(d-ocl-examples
     ${OpenCL_LIBRARIES}
+    ${OpenCV_LIBS}
     d-ocl-core
 )
 target_compile_definitions(d-ocl-examples

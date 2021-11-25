@@ -11,7 +11,7 @@ static std::mutex g_mutex;
 // all-purpose buffer e.g. for file i/o
 static std::vector<char> g_scratchBuffer;
 
-auto d_ocl_check_run(const std::string& funcName, cl_int funcRetval) -> bool
+auto d_ocl::check_run(const std::string& funcName, cl_int funcRetval) -> bool
 {
     if (funcRetval == CL_SUCCESS) {
         return true;
@@ -21,18 +21,18 @@ auto d_ocl_check_run(const std::string& funcName, cl_int funcRetval) -> bool
     return false;
 }
 
-auto gpuPlatforms() -> std::vector<cl_platform_id>
+auto d_ocl::gpuPlatforms() -> std::vector<cl_platform_id>
 {
     // find available platform count first
     cl_uint numPlatforms;
-    if (!d_ocl_check_run("clGetPlatformIDs",
-                         clGetPlatformIDs(0, nullptr, &numPlatforms))) {
+    if (!d_ocl::check_run("clGetPlatformIDs",
+                          clGetPlatformIDs(0, nullptr, &numPlatforms))) {
         numPlatforms = 0;
     }
 
     std::vector<cl_platform_id> platforms(numPlatforms);
     if (numPlatforms == 0
-        || !d_ocl_check_run(
+        || !d_ocl::check_run(
             "clGetPlatformIDs",
             clGetPlatformIDs(numPlatforms, platforms.data(), nullptr))) {
         platforms.clear();
@@ -41,10 +41,10 @@ auto gpuPlatforms() -> std::vector<cl_platform_id>
     return platforms;
 }
 
-auto gpuDevices(cl_platform_id platform) -> std::vector<cl_device_id>
+auto d_ocl::gpuDevices(cl_platform_id platform) -> std::vector<cl_device_id>
 {
     cl_uint numDevices;
-    if (!d_ocl_check_run(
+    if (!d_ocl::check_run(
             "clGetDeviceIDs",
             clGetDeviceIDs(
                 platform, CL_DEVICE_TYPE_GPU, 0, nullptr, &numDevices))) {
@@ -53,19 +53,19 @@ auto gpuDevices(cl_platform_id platform) -> std::vector<cl_device_id>
 
     std::vector<cl_device_id> devices(numDevices);
     if (numDevices == 0
-        || !d_ocl_check_run("clGetDeviceIDs",
-                            clGetDeviceIDs(platform,
-                                           CL_DEVICE_TYPE_GPU,
-                                           numDevices,
-                                           devices.data(),
-                                           nullptr))) {
+        || !d_ocl::check_run("clGetDeviceIDs",
+                             clGetDeviceIDs(platform,
+                                            CL_DEVICE_TYPE_GPU,
+                                            numDevices,
+                                            devices.data(),
+                                            nullptr))) {
         devices.clear();
     }
 
     return devices;
 }
 
-auto gpuPlatformDevices()
+auto d_ocl::gpuPlatformDevices()
     -> std::unordered_map<cl_platform_id, std::vector<cl_device_id>>
 {
     // find platforms and all gpu devices in each
@@ -93,8 +93,8 @@ auto handleError(const char* errinfo,
     std::cerr << "opencl error:" << std::endl << errinfo << std::endl;
 }
 
-auto createContext(cl_platform_id platform,
-                   const std::vector<cl_device_id>& devices)
+auto d_ocl::createContext(cl_platform_id platform,
+                          const std::vector<cl_device_id>& devices)
     -> std::shared_ptr<d_ocl_manager<cl_context>>
 {
     // list is terminated with 0. request to use this platform for the context
@@ -116,7 +116,7 @@ auto createContext(cl_platform_id platform,
         &clReleaseContext);
 }
 
-auto createCmdQueue(cl_device_id device, cl_context context)
+auto d_ocl::createCmdQueue(cl_device_id device, cl_context context)
     -> std::shared_ptr<d_ocl_manager<cl_command_queue>>
 {
     return d_ocl_manager<cl_command_queue>::makeShared(
@@ -124,7 +124,39 @@ auto createCmdQueue(cl_device_id device, cl_context context)
         &clReleaseCommandQueue);
 }
 
-auto createProgram(cl_context context, const std::string& filePath)
+auto d_ocl::createBasicPalette(basic_palette& palette) -> bool
+{
+    std::unordered_map<cl_platform_id, std::vector<cl_device_id>>
+        platformDevices = gpuPlatformDevices();
+    if (platformDevices.empty()) {
+        std::cerr << "no gpu device found" << std::endl;
+        return false;
+    }
+    const auto platformIter = platformDevices.cbegin();
+    // guaranteed to have at least 1 device in platform.
+    // just going to use the first one
+    cl_device_id device = platformIter->second[0];
+
+    std::shared_ptr<d_ocl_manager<cl_context>> context = d_ocl::createContext(
+        platformIter->first, std::vector<cl_device_id>(1, device));
+    if (!context) {
+        std::cerr << "error creating gpu device context" << std::endl;
+        return false;
+    }
+    // to communicate with device
+    std::shared_ptr<d_ocl_manager<cl_command_queue>> cmdQueue
+        = d_ocl::createCmdQueue(device, context->openclObject);
+    if (!cmdQueue) {
+        std::cerr << "error creating gpu device cmd queue" << std::endl;
+        return false;
+    }
+
+    palette.context = context;
+    palette.cmdQueue = cmdQueue;
+    return true;
+}
+
+auto d_ocl::createProgram(cl_context context, const std::string& filePath)
     -> std::shared_ptr<d_ocl_manager<cl_program>>
 {
     // something really wrong if a single source file is more than 8 mb
@@ -173,13 +205,13 @@ auto createProgram(cl_context context, const std::string& filePath)
     }
 
     // compile and link the program
-    if (!d_ocl_check_run("clBuildProgram",
-                         clBuildProgram(program->openclObject,
-                                        0,
-                                        nullptr,
-                                        nullptr,
-                                        nullptr,
-                                        nullptr))) {
+    if (!d_ocl::check_run("clBuildProgram",
+                          clBuildProgram(program->openclObject,
+                                         0,
+                                         nullptr,
+                                         nullptr,
+                                         nullptr,
+                                         nullptr))) {
         // clReleaseProgram if build failed
         program.reset();
     }
@@ -196,7 +228,7 @@ auto information(cl_device_id device,
     // first find out value string length
     size_t requiredSize = 0;
     // requiredSize will be set to value string length
-    if (!d_ocl_check_run(
+    if (!d_ocl::check_run(
             "clGetDeviceInfo",
             clGetDeviceInfo(
                 device, param_name, 0, param_value.data(), &requiredSize))) {
@@ -205,13 +237,13 @@ auto information(cl_device_id device,
 
     // add 1 for safety, like null-termination
     param_value.resize(requiredSize + 1, default_value);
-    return d_ocl_check_run(
+    return d_ocl::check_run(
         "clGetDeviceInfo",
         clGetDeviceInfo(
             device, param_name, requiredSize, param_value.data(), nullptr));
 };
 
-auto description(cl_device_id device) -> std::string
+auto d_ocl::description(cl_device_id device) -> std::string
 {
     std::ostringstream stream;
 

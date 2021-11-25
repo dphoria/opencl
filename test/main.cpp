@@ -5,7 +5,7 @@
 auto main(int argc, char** argv) -> int
 {
     std::unordered_map<cl_platform_id, std::vector<cl_device_id>>
-        platformDevices = gpuPlatformDevices();
+        platformDevices = d_ocl::gpuPlatformDevices();
     if (platformDevices.empty()) {
         std::cerr << "no gpu platforms / devices found" << std::endl;
         return 1;
@@ -18,7 +18,7 @@ auto main(int argc, char** argv) -> int
             std::cout << "----" << std::endl
                       << "device " << i << ":" << std::endl
                       << "----" << std::endl
-                      << description(iter.second[i]) << std::endl;
+                      << d_ocl::description(iter.second[i]) << std::endl;
         }
     }
 

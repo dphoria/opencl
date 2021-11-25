@@ -1,7 +1,8 @@
+/* must match HIST_BINS in the test driver c++ function */
 #define HIST_BINS   256
 
 __kernel
-void histogram_4_1(__global int* data, int numData, __global int* histogram)
+void histogram_4_2(__global int* data, int numData, __global int* histogram)
 {
     /*
     each work-group operates on its own histogram
