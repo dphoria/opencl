@@ -6,11 +6,11 @@ set(SOURCES
     d_ocl_examples.cpp
     d_ocl_examples.h
 )
-# add all source files in programs/
+# add all source files in src/
 file(GLOB_RECURSE EX_SRC_FILES FOLLOW_SYMLINKS                  # visit subdirectories that are symlinks
     RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" CONFIGURE_DEPENDS    # regenerate build system when file list changes
-    programs/*.cpp
-    programs/*.h
+    src/*.cpp
+    src/*.h
 )
 
 list(APPEND SOURCES ${EX_SRC_FILES})
