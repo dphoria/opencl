@@ -25,11 +25,16 @@ auto histogram_4_2() -> bool
         std::cerr << "did not find cat.bmp" << std::endl;
         return false;
     }
+    if (bmp.depth() != CV_8U) {
+        std::cerr << "input image must contain pixel data in unsigned 8-bit int"
+                  << std::endl;
+        return false;
+    }
 
     // image size in bytes
     const size_t imageSize = bmp.step[0] * bmp.rows;
-    // total pixel count
-    const size_t imageElements = bmp.rows * bmp.cols;
+    // total sample count (pixels * channels per pixel)
+    const size_t imageElements = bmp.rows * bmp.cols * bmp.channels();
     // host-side histogram
     std::vector<int> hostHistogram(HIST_BINS, 0);
     const size_t histogramSize = hostHistogram.size() * sizeof(int);
@@ -95,7 +100,8 @@ auto histogram_4_2() -> bool
         || !kernel
         // arguments for
         // histogram_4_2(
-        //     __global int* data, int numData, __global int* histogram)
+        //     __global unsigned char* data, int numData, __global int*
+        //     histogram)
         || !d_ocl::check_run("clSetKernelArg",
                              clSetKernelArg(kernel->openclObject,
                                             0,
@@ -122,9 +128,10 @@ auto histogram_4_2() -> bool
 
     // max # work-items per compute unit
     std::vector<cl_uint> maxWorkGroupSize;
-    // max # work-items per dimension //
+    // max # work-items per dimension
     std::vector<cl_uint> maxWorkItemsByDim;
-    // comput units available on device
+    // # parallel compute units
+    // keep in mind a work-group executes on a single compute unit
     std::vector<cl_uint> numComputeUnits;
     if (!d_ocl::information<cl_uint>(
             device, CL_DEVICE_MAX_WORK_GROUP_SIZE, maxWorkGroupSize, 0)
@@ -138,9 +145,12 @@ auto histogram_4_2() -> bool
     }
 
     size_t workGroupSize = std::min(maxWorkGroupSize[0], maxWorkItemsByDim[0]);
+    // will read at most this many pixel data points concurrently
+    // max # parallel compute units (work-groups) * max # work-items in
+    // work-group
     size_t globalSize = numComputeUnits[0] * workGroupSize;
 
-    std::cout << "input image: " << imageElements << " pixels" << std::endl
+    std::cout << "input image: " << imageElements << " elements" << std::endl
               << "global size: " << globalSize << std::endl
               << "work_groups: "
               << std::ceil((float)imageElements / workGroupSize) << std::endl
@@ -173,15 +183,25 @@ auto histogram_4_2() -> bool
         return false;
     }
 
-    // to save stdout space, print only if > 0
-    for (size_t pixel = 0; pixel < HIST_BINS; pixel++) {
-        if (hostHistogram[pixel] > 0) {
-            std::cout << "histogram[" << pixel << "] = " << hostHistogram[pixel]
-                      << std::endl;
-        }
+    // brute-force histogram
+    std::vector<int> histogram(HIST_BINS, 0);
+    // each item is a component in the given pixel
+    // e.g. for RGB: {pixel 0 R, pixel 0 G, pixel 0 B, pixel 1 R, ...}
+    const uint8_t* pixelData = reinterpret_cast<uint8_t*>(bmp.data);
+    for (size_t pixel = 0; pixel < imageElements; pixel++) {
+        histogram[pixelData[pixel]]++;
     }
 
-    // TODO: verify against correct answer
+    // compare answers
+    for (size_t bin = 0; bin < HIST_BINS; bin++) {
+        if (histogram[bin] != hostHistogram[bin]) {
+            std::cerr << "opencl histogram[" << bin
+                      << "] = " << hostHistogram[bin]
+                      << " != " << histogram[bin] << " = c++ histogram[" << bin
+                      << "]" << std::endl;
+            return false;
+        }
+    }
 
     return true;
 }

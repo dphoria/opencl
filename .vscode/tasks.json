@@ -3,7 +3,7 @@
         {
             "label": "build",
             "type": "shell",
-            "command": "make -C ./build check-clang-format",
+            "command": "make -C ./build test-opencl",
             "group": {
                 "kind": "build",
                 "isDefault": true

@@ -2,7 +2,7 @@
 #define HIST_BINS   256
 
 __kernel
-void histogram_4_2(__global int* data, int numData, __global int* histogram)
+void histogram_4_2(__global unsigned char* data, int numData, __global int* histogram)
 {
     /* each work-group operates on its own histogram */
     /* of same size as the global one */
@@ -21,10 +21,8 @@ void histogram_4_2(__global int* data, int numData, __global int* histogram)
     /* wait until every bin in local histogram has been initialized */
     barrier(CLK_LOCAL_MEM_FENCE);
 
-    /* one work-item will read i-th value in data */
-    /* increment the data[i]-th bin by 1 */
-    /* meaning data[i] must satisfy 0 <= data[i] < HIST_BINS */
-
+    /* data is unsigned char*, therefore i is like */
+    /* {pixel 0 channel B, pixel 0 channel G, pixel 0 channel R, pixel 1 channel B, ...} */
     for (int i = globalId; i < numData; i += get_global_size(0)) {
         atomic_add(&localHistogram[data[i]], 1);
     }
