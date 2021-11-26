@@ -42,8 +42,8 @@ auto vector_add_3_4() -> bool
 
     // device-side memory
     // initialize with data from host-side vector
-    std::shared_ptr<d_ocl_manager<cl_mem>> deviceA
-        = d_ocl_manager<cl_mem>::makeShared(
+    std::shared_ptr<d_ocl::manager<cl_mem>> deviceA
+        = d_ocl::manager<cl_mem>::makeShared(
             clCreateBuffer(palette.context->openclObject,
                            CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY
                                | CL_MEM_COPY_HOST_PTR,
@@ -51,8 +51,8 @@ auto vector_add_3_4() -> bool
                            hostA.data(),
                            nullptr),
             &clReleaseMemObject);
-    std::shared_ptr<d_ocl_manager<cl_mem>> deviceB
-        = d_ocl_manager<cl_mem>::makeShared(
+    std::shared_ptr<d_ocl::manager<cl_mem>> deviceB
+        = d_ocl::manager<cl_mem>::makeShared(
             clCreateBuffer(palette.context->openclObject,
                            CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY
                                | CL_MEM_COPY_HOST_PTR,
@@ -61,8 +61,8 @@ auto vector_add_3_4() -> bool
                            nullptr),
             &clReleaseMemObject);
     // to get answer from device to host accessible memory
-    std::shared_ptr<d_ocl_manager<cl_mem>> deviceC
-        = d_ocl_manager<cl_mem>::makeShared(
+    std::shared_ptr<d_ocl::manager<cl_mem>> deviceC
+        = d_ocl::manager<cl_mem>::makeShared(
             clCreateBuffer(palette.context->openclObject,
                            CL_MEM_WRITE_ONLY | CL_MEM_HOST_READ_ONLY,
                            dataSize,
@@ -75,14 +75,14 @@ auto vector_add_3_4() -> bool
     }
 
     // compile and link the program
-    std::shared_ptr<d_ocl_manager<cl_program>> program = d_ocl::createProgram(
+    std::shared_ptr<d_ocl::manager<cl_program>> program = d_ocl::createProgram(
         palette.context->openclObject,
         EX_RESOURCE_ROOT "/" EX_NAME_VECTOR_ADD_3_4 "." D_OCL_KERN_EXT);
 
-    std::shared_ptr<d_ocl_manager<cl_kernel>> kernel;
+    std::shared_ptr<d_ocl::manager<cl_kernel>> kernel;
     if (program) {
         // make a kernel out of the program
-        kernel = d_ocl_manager<cl_kernel>::makeShared(
+        kernel = d_ocl::manager<cl_kernel>::makeShared(
             // specify the kernel name, decorated with __kernel in the source
             clCreateKernel(
                 program->openclObject, EX_NAME_VECTOR_ADD_3_4, nullptr),

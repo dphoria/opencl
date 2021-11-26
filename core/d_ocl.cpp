@@ -95,7 +95,7 @@ auto handleError(const char* errinfo,
 
 auto d_ocl::createContext(cl_platform_id platform,
                           const std::vector<cl_device_id>& devices)
-    -> std::shared_ptr<d_ocl_manager<cl_context>>
+    -> std::shared_ptr<manager<cl_context>>
 {
     // list is terminated with 0. request to use this platform for the context
     std::vector<cl_context_properties> contextProperties
@@ -103,7 +103,7 @@ auto d_ocl::createContext(cl_platform_id platform,
            reinterpret_cast<cl_context_properties>(platform),
            0};
 
-    return d_ocl_manager<cl_context>::makeShared(
+    return manager<cl_context>::makeShared(
         clCreateContext(contextProperties.data(),
                         devices.size(),
                         devices.data(),
@@ -117,9 +117,9 @@ auto d_ocl::createContext(cl_platform_id platform,
 }
 
 auto d_ocl::createCmdQueue(cl_device_id device, cl_context context)
-    -> std::shared_ptr<d_ocl_manager<cl_command_queue>>
+    -> std::shared_ptr<manager<cl_command_queue>>
 {
-    return d_ocl_manager<cl_command_queue>::makeShared(
+    return manager<cl_command_queue>::makeShared(
         clCreateCommandQueueWithProperties(context, device, nullptr, nullptr),
         &clReleaseCommandQueue);
 }
@@ -137,14 +137,14 @@ auto d_ocl::createBasicPalette(basic_palette& palette) -> bool
     // just going to use the first one
     cl_device_id device = platformIter->second[0];
 
-    std::shared_ptr<d_ocl_manager<cl_context>> context = d_ocl::createContext(
+    std::shared_ptr<manager<cl_context>> context = d_ocl::createContext(
         platformIter->first, std::vector<cl_device_id>(1, device));
     if (!context) {
         std::cerr << "error creating gpu device context" << std::endl;
         return false;
     }
     // to communicate with device
-    std::shared_ptr<d_ocl_manager<cl_command_queue>> cmdQueue
+    std::shared_ptr<manager<cl_command_queue>> cmdQueue
         = d_ocl::createCmdQueue(device, context->openclObject);
     if (!cmdQueue) {
         std::cerr << "error creating gpu device cmd queue" << std::endl;
@@ -157,7 +157,7 @@ auto d_ocl::createBasicPalette(basic_palette& palette) -> bool
 }
 
 auto d_ocl::createProgram(cl_context context, const std::string& filePath)
-    -> std::shared_ptr<d_ocl_manager<cl_program>>
+    -> std::shared_ptr<manager<cl_program>>
 {
     // something really wrong if a single source file is more than 8 mb
     const size_t bufferSize = 1 << 23;
@@ -191,12 +191,12 @@ auto d_ocl::createProgram(cl_context context, const std::string& filePath)
         if (pos >= bufferSize) {
             std::cerr << filePath << " is more than " << bufferSize << " bytes"
                       << std::endl;
-            return d_ocl_manager<cl_program>::makeShared(nullptr, nullptr);
+            return manager<cl_program>::makeShared(nullptr, nullptr);
         }
     }
 
-    std::shared_ptr<d_ocl_manager<cl_program>> program
-        = d_ocl_manager<cl_program>::makeShared(
+    std::shared_ptr<manager<cl_program>> program
+        = manager<cl_program>::makeShared(
             clCreateProgramWithSource(
                 context, lines.size(), lines.data(), lengths.data(), nullptr),
             &clReleaseProgram);
@@ -220,10 +220,10 @@ auto d_ocl::createProgram(cl_context context, const std::string& filePath)
 
 // wrapper around clGetDeviceInfo()
 template<typename T>
-auto information(cl_device_id device,
-                 cl_device_info param_name,
-                 std::vector<T>& param_value,
-                 T default_value) -> bool
+auto d_ocl::information(cl_device_id device,
+                        cl_device_info param_name,
+                        std::vector<T>& param_value,
+                        T default_value) -> bool
 {
     // first find out value string length
     size_t requiredSize = 0;

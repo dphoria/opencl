@@ -9,6 +9,41 @@
 #include <vector>
 
 namespace d_ocl {
+
+// ensure release when finished with open resource like cl_context
+template<typename T>
+struct manager
+{
+    // e.g. clReleaseContext
+    using opencl_release_func = cl_int (*)(T);
+
+    static auto makeShared(T openclObject, opencl_release_func releaseFunc)
+        -> std::shared_ptr<manager<T>>
+    {
+        if (openclObject == nullptr) {
+            // operator bool will fail test
+            return std::shared_ptr<manager<T>>();
+        }
+
+        return std::make_shared<manager<T>>(openclObject, releaseFunc);
+    }
+
+    manager(T openclObject, opencl_release_func releaseFunc)
+    {
+        this->openclObject = openclObject;
+        this->releaseFunc = releaseFunc;
+    }
+    ~manager()
+    {
+        if (openclObject != nullptr && releaseFunc != nullptr) {
+            releaseFunc(openclObject);
+        }
+    }
+
+    T openclObject{nullptr};
+    opencl_release_func releaseFunc{nullptr};
+};
+
 // helper to return true if funcRetval == CL_SUCCESS
 // else print funcRetval and return false
 auto D_OCL_API check_run(const std::string& funcName, cl_int funcRetval)
@@ -25,14 +60,14 @@ auto D_OCL_API gpuPlatformDevices()
 
 auto D_OCL_API createContext(cl_platform_id platform,
                              const std::vector<cl_device_id>& devices)
-    -> std::shared_ptr<d_ocl_manager<cl_context>>;
+    -> std::shared_ptr<manager<cl_context>>;
 auto D_OCL_API createCmdQueue(cl_device_id device, cl_context context)
-    -> std::shared_ptr<d_ocl_manager<cl_command_queue>>;
+    -> std::shared_ptr<manager<cl_command_queue>>;
 
 struct D_OCL_API basic_palette
 {
-    std::shared_ptr<d_ocl_manager<cl_context>> context;
-    std::shared_ptr<d_ocl_manager<cl_command_queue>> cmdQueue;
+    std::shared_ptr<manager<cl_context>> context;
+    std::shared_ptr<manager<cl_command_queue>> cmdQueue;
 };
 // convenience func to create context and command queue for the first gpu device
 // found
@@ -41,8 +76,14 @@ auto D_OCL_API createBasicPalette(basic_palette& palette) -> bool;
 // read kernel source from filePath to create cl_program
 // program will have been built (compile, link)
 auto D_OCL_API createProgram(cl_context context, const std::string& filePath)
-    -> std::shared_ptr<d_ocl_manager<cl_program>>;
+    -> std::shared_ptr<manager<cl_program>>;
 
+// wrapper around clGetDeviceInfo()
+template<typename T>
+auto information(cl_device_id device,
+                 cl_device_info param_name,
+                 std::vector<T>& param_value,
+                 T default_value) -> bool;
 // generate human-readable description
 auto D_OCL_API description(cl_device_id device) -> std::string;
 } // namespace d_ocl
