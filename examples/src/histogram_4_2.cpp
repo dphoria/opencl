@@ -146,8 +146,8 @@ auto histogram_4_2() -> bool
 
     size_t workGroupSize = std::min(maxWorkGroupSize[0], maxWorkItemsByDim[0]);
     // will read at most this many pixel data points concurrently
-    // max # parallel compute units (work-groups) * max # work-items in
-    // work-group
+    // max # parallel compute units (work-groups)
+    // * max # work-items in work-group
     size_t globalSize = numComputeUnits[0] * workGroupSize;
 
     std::cout << "input image: " << imageElements << " elements" << std::endl

@@ -24,14 +24,14 @@ void histogram_4_2(__global unsigned char* data, int numData, __global int* hist
     /* data is unsigned char*, therefore i is like */
     /* {pixel 0 channel B, pixel 0 channel G, pixel 0 channel R, pixel 1 channel B, ...} */
     for (int i = globalId; i < numData; i += get_global_size(0)) {
-        atomic_add(&localHistogram[data[i]], 1);
+        atomic_add(localHistogram + data[i], 1);
     }
 
     barrier(CLK_LOCAL_MEM_FENCE);
 
     /* add each work-group's local histogram to global */
     for (int i = localId; i < HIST_BINS; i += get_local_size(0)) {
-        atomic_add(&histogram[i], localHistogram[i]);
+        atomic_add(histogram + i, localHistogram[i]);
     }
 
     /* reduced atomic operations on global memory from # pixels to # bins */
