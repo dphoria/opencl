@@ -8,7 +8,7 @@
             "name": "clang++ - Build and debug active file",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/test/test-opencl",
+            "program": "${command:cmake.getLaunchTargetPath}",
             "args": [],
             "stopAtEntry": true,
             "cwd": "${workspaceFolder}",

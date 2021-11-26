@@ -7,7 +7,7 @@ if (EXISTS "${CLANG_TIDY_PATH}")
     add_custom_target(check-clang-tidy)
     add_custom_command(
         TARGET check-clang-tidy PRE_BUILD
-        COMMAND python scripts/clang_tidy.py --recurse -p "${CMAKE_SOURCE_DIR}/build"
+        COMMAND python scripts/clang_tidy.py --recurse -p "${CMAKE_BINARY_DIR}"
         WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
     )
 
@@ -16,7 +16,7 @@ if (EXISTS "${CLANG_TIDY_PATH}")
     add_custom_command(
         TARGET apply-clang-tidy PRE_BUILD
         # write corrections to file
-        COMMAND python scripts/clang_tidy.py --recurse --write -p "${CMAKE_SOURCE_DIR}/build"
+        COMMAND python scripts/clang_tidy.py --recurse --write -p "${CMAKE_BINARY_DIR}"
         WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
     )
 else()

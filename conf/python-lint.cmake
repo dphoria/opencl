@@ -7,6 +7,7 @@ add_custom_command(
     COMMAND python -m flake8 "${CMAKE_SOURCE_DIR}"
     COMMAND echo black
     COMMAND python -m black --diff "${CMAKE_SOURCE_DIR}"
+    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
 )
 
 # black
@@ -15,4 +16,5 @@ add_custom_command(
     TARGET apply-python-format PRE_BUILD
     # all *.py files
     COMMAND python -m black "${CMAKE_SOURCE_DIR}"
+    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
 )

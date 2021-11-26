@@ -3,7 +3,7 @@
         {
             "label": "build",
             "type": "shell",
-            "command": "make -C ./build test-opencl",
+            "command": "cmake --build ${command:cmake.buildDirectory} --target ${command:cmake.launchTargetFilename}",
             "group": {
                 "kind": "build",
                 "isDefault": true
@@ -12,7 +12,7 @@
         {
             "label": "clang-format-fix",
             "type": "shell",
-            "command": "make -C ./build apply-clang-format",
+            "command": "cmake --build ${command:cmake.buildDirectory} --target apply-clang-format",
             "group": {
                 "kind": "build",
                 "isDefault": false

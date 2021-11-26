@@ -152,7 +152,7 @@ auto histogram_4_2() -> bool
 
     std::cout << "input image: " << imageElements << " elements" << std::endl
               << "global size: " << globalSize << std::endl
-              << "work_groups: "
+              << "work-groups: "
               << std::ceil((float)imageElements / workGroupSize) << std::endl
               << "work-items per work-group (local size): " << workGroupSize
               << std::endl;
