@@ -80,10 +80,10 @@ auto D_OCL_API createProgram(cl_context context, const std::string& filePath)
 
 // wrapper around clGetDeviceInfo()
 template<typename T>
-auto information(cl_device_id device,
-                 cl_device_info param_name,
-                 std::vector<T>& param_value,
-                 T default_value) -> bool;
+auto D_OCL_API information(cl_device_id device,
+                           cl_device_info param_name,
+                           std::vector<T>& param_value,
+                           T default_value) -> bool;
 // generate human-readable description
 auto D_OCL_API description(cl_device_id device) -> std::string;
 } // namespace d_ocl

@@ -19,21 +19,21 @@ void histogram_4_2(__global int* data, int numData, __global int* histogram)
     }
 
     /* wait until every bin in local histogram has been initialized */
-    work_group_barrier(CLK_LOCAL_MEM_FENCE);
+    barrier(CLK_LOCAL_MEM_FENCE);
 
     /* one work-item will read i-th value in data */
     /* increment the data[i]-th bin by 1 */
     /* meaning data[i] must satisfy 0 <= data[i] < HIST_BINS */
 
     for (int i = globalId; i < numData; i += get_global_size(0)) {
-        atomic_store(localHistogram + data[i], atomic_load(localHistogram + data[i]) + 1);
+        atomic_add(&localHistogram[data[i]], 1);
     }
 
-    work_group_barrier(CLK_LOCAL_MEM_FENCE);
+    barrier(CLK_LOCAL_MEM_FENCE);
 
     /* add each work-group's local histogram to global */
     for (int i = localId; i < HIST_BINS; i += get_local_size(0)) {
-        atomic_store(histogram + i, atomic_load(histogram + i) + atomic_load(localHistogram + i));
+        atomic_add(&histogram[i], localHistogram[i]);
     }
 
     /* reduced atomic operations on global memory from # pixels to # bins */

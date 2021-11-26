@@ -29,7 +29,7 @@ auto histogram_4_2() -> bool
     // image size in bytes
     const size_t imageSize = bmp.step[0] * bmp.rows;
     // total pixel count
-    const int imageElements = bmp.rows * bmp.cols;
+    const size_t imageElements = bmp.rows * bmp.cols;
     // host-side histogram
     std::vector<int> hostHistogram(HIST_BINS, 0);
     const size_t histogramSize = hostHistogram.size() * sizeof(int);
@@ -76,7 +76,6 @@ auto histogram_4_2() -> bool
         return false;
     }
 
-    // TODO: createProgram() fails with cl_status -11
     // compile and link the program
     std::shared_ptr<d_ocl::manager<cl_program>> program = d_ocl::createProgram(
         palette.context->openclObject,
@@ -95,8 +94,8 @@ auto histogram_4_2() -> bool
     if (!program
         || !kernel
         // arguments for
-        // histogram_4_2(__global int* data, int numData, __global int*
-        // histogram)
+        // histogram_4_2(
+        //     __global int* data, int numData, __global int* histogram)
         || !d_ocl::check_run("clSetKernelArg",
                              clSetKernelArg(kernel->openclObject,
                                             0,
@@ -121,32 +120,46 @@ auto histogram_4_2() -> bool
     // createBasicPalette() above just used the first gpu device for the context
     cl_device_id device = platformIter->second[0];
 
-    // # compute units == # work items == # concurrent kernel program instances
-    std::vector<cl_uint> numWorkItems(1, 0);
+    // max # work-items per compute unit
+    std::vector<cl_uint> maxWorkGroupSize;
+    // max # work-items per dimension //
+    std::vector<cl_uint> maxWorkItemsByDim;
+    // comput units available on device
+    std::vector<cl_uint> numComputeUnits;
     if (!d_ocl::information<cl_uint>(
-            device, CL_DEVICE_MAX_COMPUTE_UNITS, numWorkItems, 0)
-        || numWorkItems[0] == 0) {
-        std::cerr << "could not query compute unit count on current gpu device"
+            device, CL_DEVICE_MAX_WORK_GROUP_SIZE, maxWorkGroupSize, 0)
+        || !d_ocl::information<cl_uint>(
+            device, CL_DEVICE_MAX_WORK_ITEM_SIZES, maxWorkItemsByDim, 0)
+        || !d_ocl::information<cl_uint>(
+            device, CL_DEVICE_MAX_COMPUTE_UNITS, numComputeUnits, 0)) {
+        std::cerr << "could not calculate appropriate execution topology"
                   << std::endl;
         return false;
     }
-    // strip in image == work-group
-    size_t workGroupSize = std::min<size_t>(numWorkItems[0], bmp.cols);
+
+    size_t workGroupSize = std::min(maxWorkGroupSize[0], maxWorkItemsByDim[0]);
+    size_t globalSize = numComputeUnits[0] * workGroupSize;
+
+    std::cout << "input image: " << imageElements << " pixels" << std::endl
+              << "global size: " << globalSize << std::endl
+              << "work_groups: "
+              << std::ceil((float)imageElements / workGroupSize) << std::endl
+              << "work-items per work-group (local size): " << workGroupSize
+              << std::endl;
 
     cl_event kernel_event;
     // queue the kernel onto the device
     // read the answer into host buffer after kernel is finished
-    if (!d_ocl::check_run(
-            "clEnqueueNDRangeKernel",
-            clEnqueueNDRangeKernel(palette.cmdQueue->openclObject,
-                                   kernel->openclObject,
-                                   1,
-                                   nullptr,
-                                   reinterpret_cast<size_t*>(&numWorkItems[0]),
-                                   &workGroupSize,
-                                   0,
-                                   nullptr,
-                                   &kernel_event))
+    if (!d_ocl::check_run("clEnqueueNDRangeKernel",
+                          clEnqueueNDRangeKernel(palette.cmdQueue->openclObject,
+                                                 kernel->openclObject,
+                                                 1,
+                                                 nullptr,
+                                                 &globalSize,
+                                                 &workGroupSize,
+                                                 0,
+                                                 nullptr,
+                                                 &kernel_event))
         || !d_ocl::check_run("clEnqueueReadBuffer",
                              clEnqueueReadBuffer(palette.cmdQueue->openclObject,
                                                  deviceHistogram->openclObject,
@@ -160,10 +173,15 @@ auto histogram_4_2() -> bool
         return false;
     }
 
-    for (size_t pixel = 0; pixel < imageElements; pixel++) {
-        std::cout << "histogram[" << pixel << "] = " << hostHistogram[pixel]
-                  << std::endl;
+    // to save stdout space, print only if > 0
+    for (size_t pixel = 0; pixel < HIST_BINS; pixel++) {
+        if (hostHistogram[pixel] > 0) {
+            std::cout << "histogram[" << pixel << "] = " << hostHistogram[pixel]
+                      << std::endl;
+        }
     }
+
+    // TODO: verify against correct answer
 
     return true;
 }

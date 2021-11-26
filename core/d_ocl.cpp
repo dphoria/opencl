@@ -230,8 +230,7 @@ auto d_ocl::information(cl_device_id device,
     // requiredSize will be set to value string length
     if (!d_ocl::check_run(
             "clGetDeviceInfo",
-            clGetDeviceInfo(
-                device, param_name, 0, param_value.data(), &requiredSize))) {
+            clGetDeviceInfo(device, param_name, 0, nullptr, &requiredSize))) {
         return false;
     }
 
@@ -278,12 +277,8 @@ auto d_ocl::description(cl_device_id device) -> std::string
 
         std::vector<cl_uint> value;
         if (information<cl_uint>(device, paramIds[i], value, 0)) {
-            for (int j = 0; j < value.size(); j++) {
-                stream << value[j];
-                if (j != 0) {
-                    // space between numbers if multi-item value
-                    stream << " ";
-                }
+            for (const cl_uint& v : value) {
+                stream << v << " ";
             }
         }
         stream << std::endl;
