@@ -9,7 +9,7 @@
 #include <vector>
 
 namespace cv {
-    struct Mat;
+struct Mat;
 }
 
 namespace d_ocl {
@@ -82,11 +82,13 @@ auto D_OCL_API createBasicPalette(basic_palette& palette) -> bool;
 auto D_OCL_API createProgram(cl_context context, const std::string& filePath)
     -> std::shared_ptr<manager<cl_program>>;
 
-// read image at filePath and initialize device-side image object with the input image.
-// opencvMat will be set to the loaded image if not null.
-auto D_OCL_API createInputImage(
-    cl_context context, cl_mem_flags flags, const std::string& filePath, cv::Mat* opencvMat = nullptr
-) -> std::shared_ptr<manager<cl_mem>>;
+// read image at filePath and initialize device-side image object with the input
+// image. opencvMat will be set to the loaded image if not null.
+auto D_OCL_API createInputImage(cl_context context,
+                                cl_mem_flags flags,
+                                const std::string& filePath,
+                                cv::Mat* opencvMat = nullptr)
+    -> std::shared_ptr<manager<cl_mem>>;
 
 // wrapper around clGetDeviceInfo()
 // will query value count for param_name first then call param_value.resize()

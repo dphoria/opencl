@@ -5,9 +5,9 @@
 #include <iostream>
 #include <list>
 #include <mutex>
-#include <sstream>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
+#include <sstream>
 
 static std::mutex g_mutex;
 // all-purpose buffer e.g. for file i/o
@@ -226,38 +226,50 @@ auto getImageFormat(const cv::Mat& mat, cl_image_format& imageFormat) -> bool
     cl_channel_type channelType;
     switch (mat.depth()) {
     case CV_8S:
-        channelType = CL_SIGNED_INT8;   break;
+        channelType = CL_SIGNED_INT8;
+        break;
     case CV_8U:
         // most common
-        channelType = CL_UNSIGNED_INT8; break;
+        channelType = CL_UNSIGNED_INT8;
+        break;
 
     case CV_16F:
-        channelType = CL_HALF_FLOAT;        break;
+        channelType = CL_HALF_FLOAT;
+        break;
     case CV_16S:
-        channelType = CL_SIGNED_INT16;      break;
+        channelType = CL_SIGNED_INT16;
+        break;
     case CV_16U:
-        channelType = CL_UNSIGNED_INT16;    break;
+        channelType = CL_UNSIGNED_INT16;
+        break;
 
     case CV_32F:
-        channelType = CL_FLOAT;         break;
+        channelType = CL_FLOAT;
+        break;
     case CV_32S:
-        channelType = CL_SIGNED_INT32;  break;
+        channelType = CL_SIGNED_INT32;
+        break;
 
     default:
-        std::cerr << "unsupported cv::Mat::depth() " << mat.depth() << std::endl;
+        std::cerr << "unsupported cv::Mat::depth() " << mat.depth()
+                  << std::endl;
         return false;
     }
 
     cl_channel_order channelOrder;
     switch (mat.channels()) {
     case 1:
-        channelOrder = CL_R;    break;
+        channelOrder = CL_R;
+        break;
     case 3:
-        channelOrder = CL_RGB;  break;
+        channelOrder = CL_RGB;
+        break;
     case 4:
-        channelOrder = CL_RGBA; break;
+        channelOrder = CL_RGBA;
+        break;
     default:
-        std::cerr << "unsupported cv::Mat.channels() " << mat.channels() << std::endl;
+        std::cerr << "unsupported cv::Mat.channels() " << mat.channels()
+                  << std::endl;
         return false;
     }
 
@@ -268,8 +280,10 @@ auto getImageFormat(const cv::Mat& mat, cl_image_format& imageFormat) -> bool
 
 auto getImageDescription(const cv::Mat& mat, cl_image_desc& description) -> bool
 {
-    if (mat.cols <= 0 || mat.rows <= 0 || mat.cols > CL_DEVICE_IMAGE2D_MAX_WIDTH || mat.rows > CL_DEVICE_IMAGE2D_MAX_HEIGHT) {
-        std::cerr << "invalid image resolution " << mat.cols << "x" << mat.rows << std::endl;
+    if (mat.cols <= 0 || mat.rows <= 0 || mat.cols > CL_DEVICE_IMAGE2D_MAX_WIDTH
+        || mat.rows > CL_DEVICE_IMAGE2D_MAX_HEIGHT) {
+        std::cerr << "invalid image resolution " << mat.cols << "x" << mat.rows
+                  << std::endl;
         return false;
     }
 
@@ -284,7 +298,7 @@ auto getImageDescription(const cv::Mat& mat, cl_image_desc& description) -> bool
 
 auto readToRgba(const std::string& filePath, cv::Mat& rgbaMat) -> bool
 {
-    cv::Mat bgraMat = cv::imread(filePath.c_str());
+    cv::Mat bgraMat = cv::imread(filePath);
     if (bgraMat.empty()) {
         std::cerr << "cv::imread(" << filePath << ") failed" << std::endl;
         return false;
@@ -307,24 +321,33 @@ auto readToRgba(const std::string& filePath, cv::Mat& rgbaMat) -> bool
     return true;
 }
 
-auto d_ocl::createInputImage(
-    cl_context context, cl_mem_flags flags, const std::string& filePath, cv::Mat* opencvMat /*= nullptr*/
-) -> std::shared_ptr<manager<cl_mem>>
+auto d_ocl::createInputImage(cl_context context,
+                             cl_mem_flags flags,
+                             const std::string& filePath,
+                             cv::Mat* opencvMat /*= nullptr*/
+                             ) -> std::shared_ptr<manager<cl_mem>>
 {
     cv::Mat mat;
     cl_image_format imageFormat;
     cl_image_desc imageDesc;
-    if (!readToRgba(filePath, mat) || !getImageFormat(mat, imageFormat) || !getImageDescription(mat, imageDesc)) {
+    if (!readToRgba(filePath, mat) || !getImageFormat(mat, imageFormat)
+        || !getImageDescription(mat, imageDesc)) {
         return std::shared_ptr<manager<cl_mem>>();
     }
 
     cl_int status;
     std::shared_ptr<manager<cl_mem>> image = manager<cl_mem>::makeShared(
         // initialize the device-side buffer with the input image
-        clCreateImage(context, flags | CL_MEM_COPY_HOST_PTR, &imageFormat, &imageDesc, mat.data, &status),
+        clCreateImage(context,
+                      flags | CL_MEM_COPY_HOST_PTR,
+                      &imageFormat,
+                      &imageDesc,
+                      mat.data,
+                      &status),
         &clReleaseMemObject);
     if (!image || status != CL_SUCCESS) {
-        std::cerr << "clCreateImage() for " << filePath << " -> " << status << std::endl;
+        std::cerr << "clCreateImage() for " << filePath << " -> " << status
+                  << std::endl;
     } else if (opencvMat != nullptr) {
         *opencvMat = mat;
     }
