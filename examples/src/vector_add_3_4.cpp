@@ -75,9 +75,10 @@ auto vector_add_3_4() -> bool
     }
 
     // compile and link the program
-    std::shared_ptr<d_ocl::utils::manager<cl_program>> program = d_ocl::createProgram(
-        palette.context->openclObject,
-        EX_RESOURCE_ROOT "/" EX_NAME_VECTOR_ADD_3_4 "." D_OCL_KERN_EXT);
+    std::shared_ptr<d_ocl::utils::manager<cl_program>> program
+        = d_ocl::createProgram(palette.context->openclObject,
+                               EX_RESOURCE_ROOT "/" EX_NAME_VECTOR_ADD_3_4
+                                                "." D_OCL_KERN_EXT);
 
     std::shared_ptr<d_ocl::utils::manager<cl_kernel>> kernel;
     if (program) {
@@ -94,20 +95,20 @@ auto vector_add_3_4() -> bool
         // arguments for
         // vector_add(__global int* A, __global int* B, __global int* C)
         || !d_ocl::utils::check_run("clSetKernelArg",
-                             clSetKernelArg(kernel->openclObject,
-                                            0,
-                                            sizeof(cl_mem),
-                                            &deviceA->openclObject))
+                                    clSetKernelArg(kernel->openclObject,
+                                                   0,
+                                                   sizeof(cl_mem),
+                                                   &deviceA->openclObject))
         || !d_ocl::utils::check_run("clSetKernelArg",
-                             clSetKernelArg(kernel->openclObject,
-                                            1,
-                                            sizeof(cl_mem),
-                                            &deviceB->openclObject))
+                                    clSetKernelArg(kernel->openclObject,
+                                                   1,
+                                                   sizeof(cl_mem),
+                                                   &deviceB->openclObject))
         || !d_ocl::utils::check_run("clSetKernelArg",
-                             clSetKernelArg(kernel->openclObject,
-                                            2,
-                                            sizeof(cl_mem),
-                                            &deviceC->openclObject))) {
+                                    clSetKernelArg(kernel->openclObject,
+                                                   2,
+                                                   sizeof(cl_mem),
+                                                   &deviceC->openclObject))) {
         std::cerr << "error creating program kernel" << std::endl;
         return false;
     }
@@ -115,26 +116,28 @@ auto vector_add_3_4() -> bool
     cl_event kernel_event;
     // queue the kernel onto the device
     // read the answer into host buffer after kernel is finished
-    if (!d_ocl::utils::check_run("clEnqueueNDRangeKernel",
-                          clEnqueueNDRangeKernel(palette.cmdQueue->openclObject,
-                                                 kernel->openclObject,
-                                                 1,
-                                                 nullptr,
-                                                 &numElements,
-                                                 nullptr,
-                                                 0,
-                                                 nullptr,
-                                                 &kernel_event))
-        || !d_ocl::utils::check_run("clEnqueueReadBuffer",
-                             clEnqueueReadBuffer(palette.cmdQueue->openclObject,
-                                                 deviceC->openclObject,
-                                                 CL_TRUE,
-                                                 0,
-                                                 dataSize,
-                                                 hostC.data(),
-                                                 1,
-                                                 &kernel_event,
-                                                 nullptr))) {
+    if (!d_ocl::utils::check_run(
+            "clEnqueueNDRangeKernel",
+            clEnqueueNDRangeKernel(palette.cmdQueue->openclObject,
+                                   kernel->openclObject,
+                                   1,
+                                   nullptr,
+                                   &numElements,
+                                   nullptr,
+                                   0,
+                                   nullptr,
+                                   &kernel_event))
+        || !d_ocl::utils::check_run(
+            "clEnqueueReadBuffer",
+            clEnqueueReadBuffer(palette.cmdQueue->openclObject,
+                                deviceC->openclObject,
+                                CL_TRUE,
+                                0,
+                                dataSize,
+                                hostC.data(),
+                                1,
+                                &kernel_event,
+                                nullptr))) {
         return false;
     }
 

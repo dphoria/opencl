@@ -19,7 +19,7 @@ auto d_ocl::gpuPlatforms() -> std::vector<cl_platform_id>
     // find available platform count first
     cl_uint numPlatforms;
     if (!d_ocl::utils::check_run("clGetPlatformIDs",
-                          clGetPlatformIDs(0, nullptr, &numPlatforms))) {
+                                 clGetPlatformIDs(0, nullptr, &numPlatforms))) {
         numPlatforms = 0;
     }
 
@@ -47,11 +47,11 @@ auto d_ocl::gpuDevices(cl_platform_id platform) -> std::vector<cl_device_id>
     std::vector<cl_device_id> devices(numDevices);
     if (numDevices == 0
         || !d_ocl::utils::check_run("clGetDeviceIDs",
-                             clGetDeviceIDs(platform,
-                                            CL_DEVICE_TYPE_GPU,
-                                            numDevices,
-                                            devices.data(),
-                                            nullptr))) {
+                                    clGetDeviceIDs(platform,
+                                                   CL_DEVICE_TYPE_GPU,
+                                                   numDevices,
+                                                   devices.data(),
+                                                   nullptr))) {
         devices.clear();
     }
 
@@ -130,8 +130,9 @@ auto d_ocl::createBasicPalette(basic_palette& palette) -> bool
     // just going to use the first one
     cl_device_id device = platformIter->second[0];
 
-    std::shared_ptr<d_ocl::utils::manager<cl_context>> context = d_ocl::createContext(
-        platformIter->first, std::vector<cl_device_id>(1, device));
+    std::shared_ptr<d_ocl::utils::manager<cl_context>> context
+        = d_ocl::createContext(platformIter->first,
+                               std::vector<cl_device_id>(1, device));
     if (!context) {
         std::cerr << "error creating gpu device context" << std::endl;
         return false;
@@ -184,7 +185,8 @@ auto d_ocl::createProgram(cl_context context, const std::string& filePath)
         if (pos >= bufferSize) {
             std::cerr << filePath << " is more than " << bufferSize << " bytes"
                       << std::endl;
-            return d_ocl::utils::manager<cl_program>::makeShared(nullptr, nullptr);
+            return d_ocl::utils::manager<cl_program>::makeShared(nullptr,
+                                                                 nullptr);
         }
     }
 
@@ -199,12 +201,12 @@ auto d_ocl::createProgram(cl_context context, const std::string& filePath)
 
     // compile and link the program
     if (!d_ocl::utils::check_run("clBuildProgram",
-                          clBuildProgram(program->openclObject,
-                                         0,
-                                         nullptr,
-                                         nullptr,
-                                         nullptr,
-                                         nullptr))) {
+                                 clBuildProgram(program->openclObject,
+                                                0,
+                                                nullptr,
+                                                nullptr,
+                                                nullptr,
+                                                nullptr))) {
         // clReleaseProgram if build failed
         program.reset();
     }
@@ -311,15 +313,16 @@ auto d_ocl::createInputImage(cl_context context,
     imageDesc.image_row_pitch = rgbaMat.step[0];
 
     cl_int status;
-    std::shared_ptr<d_ocl::utils::manager<cl_mem>> image = d_ocl::utils::manager<cl_mem>::makeShared(
-        // initialize the device-side buffer with the input image
-        clCreateImage(context,
-                      flags | CL_MEM_COPY_HOST_PTR,
-                      &imageFormat,
-                      &imageDesc,
-                      rgbaMat.data,
-                      &status),
-        &clReleaseMemObject);
+    std::shared_ptr<d_ocl::utils::manager<cl_mem>> image
+        = d_ocl::utils::manager<cl_mem>::makeShared(
+            // initialize the device-side buffer with the input image
+            clCreateImage(context,
+                          flags | CL_MEM_COPY_HOST_PTR,
+                          &imageFormat,
+                          &imageDesc,
+                          rgbaMat.data,
+                          &status),
+            &clReleaseMemObject);
     if (!image || status != CL_SUCCESS) {
         std::cerr << "clCreateImage() for " << filePath << " failed: " << status
                   << std::endl;
@@ -332,25 +335,23 @@ auto d_ocl::createInputImage(cl_context context,
 }
 
 auto d_ocl::createOutputImage(cl_context context,
-                                 cl_mem_flags flags,
-                                 const cv::Mat& opencvMat)
+                              cl_mem_flags flags,
+                              const cv::Mat& opencvMat)
     -> std::shared_ptr<d_ocl::utils::manager<cl_mem>>
 {
     cl_image_format imageFormat;
     cl_image_desc imageDesc;
-    if (!getImageFormat(opencvMat, imageFormat) || !getImageDescription(opencvMat, imageDesc)) {
+    if (!getImageFormat(opencvMat, imageFormat)
+        || !getImageDescription(opencvMat, imageDesc)) {
         return std::shared_ptr<d_ocl::utils::manager<cl_mem>>();
     }
 
     cl_int status;
-    std::shared_ptr<d_ocl::utils::manager<cl_mem>> image = d_ocl::utils::manager<cl_mem>::makeShared(
-        clCreateImage(context,
-                      flags,
-                      &imageFormat,
-                      &imageDesc,
-                      nullptr,
-                      &status),
-        &clReleaseMemObject);
+    std::shared_ptr<d_ocl::utils::manager<cl_mem>> image
+        = d_ocl::utils::manager<cl_mem>::makeShared(
+            clCreateImage(
+                context, flags, &imageFormat, &imageDesc, nullptr, &status),
+            &clReleaseMemObject);
     if (!image || status != CL_SUCCESS) {
         std::cerr << "clCreateImage() for output image failed: " << status
                   << std::endl;

@@ -2,17 +2,15 @@
 #define D_OCL_UTILS_H
 
 #include "d_ocl_defines.h"
+#include <CL/cl.h>
 #include <vector>
 
-namespace cv
-{
+namespace cv {
 struct Mat;
 }
 
-namespace d_ocl
-{
-namespace utils
-{
+namespace d_ocl {
+namespace utils {
 // helper to return true if funcRetval == CL_SUCCESS
 // else print funcRetval and return false
 auto D_OCL_API check_run(const std::string& funcName, cl_int funcRetval)
@@ -52,7 +50,10 @@ struct manager
     opencl_release_func releaseFunc{nullptr};
 };
 
+// change channel order from opencv-default bgr[a] to rgb[a]
 auto D_OCL_API toRgba(const cv::Mat* bgraMat, cv::Mat* rgbaMat) -> bool;
+// convert data depth to 32-bit float 0.0~1.0
+auto D_OCL_API toFloat(const cv::Mat* intMat, cv::Mat* floatMat) -> bool;
 
 // wrapper around clGetDeviceInfo()
 // will query value count for param_name first then call param_value.resize()

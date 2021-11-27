@@ -9,13 +9,11 @@
 #include <unordered_map>
 #include <vector>
 
-namespace cv
-{
+namespace cv {
 struct Mat;
 }
 
-namespace d_ocl
-{
+namespace d_ocl {
 auto D_OCL_API gpuPlatforms() -> std::vector<cl_platform_id>;
 auto D_OCL_API gpuDevices(cl_platform_id platform) -> std::vector<cl_device_id>;
 // every vector<cl_device_id> is guaranteed to have at least 1 cl_device_id
@@ -52,7 +50,8 @@ auto D_OCL_API createInputImage(cl_context context,
                                 const std::string& filePath,
                                 cv::Mat* opencvMat = nullptr)
     -> std::shared_ptr<d_ocl::utils::manager<cl_mem>>;
-// create device-side output buffer for image with same specification (resolution, etc.) as opencvMat
+// create device-side output buffer for image with same specification
+// (resolution, etc.) as opencvMat
 auto D_OCL_API createOutputImage(cl_context context,
                                  cl_mem_flags flags,
                                  const cv::Mat& opencvMat)

@@ -68,23 +68,25 @@ auto histogram_4_2() -> bool
     // initialize the output histogram with zeros
     const int zero = 0;
     cl_event histogramInitialized;
-    if (!d_ocl::utils::check_run("clEnqueueFillBuffer",
-                          clEnqueueFillBuffer(palette.cmdQueue->openclObject,
-                                              deviceHistogram->openclObject,
-                                              &zero,
-                                              sizeof(zero),
-                                              0,
-                                              histogramSize,
-                                              0,
-                                              nullptr,
-                                              &histogramInitialized))) {
+    if (!d_ocl::utils::check_run(
+            "clEnqueueFillBuffer",
+            clEnqueueFillBuffer(palette.cmdQueue->openclObject,
+                                deviceHistogram->openclObject,
+                                &zero,
+                                sizeof(zero),
+                                0,
+                                histogramSize,
+                                0,
+                                nullptr,
+                                &histogramInitialized))) {
         return false;
     }
 
     // compile and link the program
-    std::shared_ptr<d_ocl::utils::manager<cl_program>> program = d_ocl::createProgram(
-        palette.context->openclObject,
-        EX_RESOURCE_ROOT "/" EX_NAME_HISTOGRAM_4_2 "." D_OCL_KERN_EXT);
+    std::shared_ptr<d_ocl::utils::manager<cl_program>> program
+        = d_ocl::createProgram(palette.context->openclObject,
+                               EX_RESOURCE_ROOT "/" EX_NAME_HISTOGRAM_4_2
+                                                "." D_OCL_KERN_EXT);
 
     std::shared_ptr<d_ocl::utils::manager<cl_kernel>> kernel;
     if (program) {
@@ -103,19 +105,20 @@ auto histogram_4_2() -> bool
         //     __global unsigned char* data, int numData, __global int*
         //     histogram)
         || !d_ocl::utils::check_run("clSetKernelArg",
-                             clSetKernelArg(kernel->openclObject,
-                                            0,
-                                            sizeof(cl_mem),
-                                            &deviceImg->openclObject))
+                                    clSetKernelArg(kernel->openclObject,
+                                                   0,
+                                                   sizeof(cl_mem),
+                                                   &deviceImg->openclObject))
         || !d_ocl::utils::check_run(
             "clSetKernelArg",
             clSetKernelArg(
                 kernel->openclObject, 1, sizeof(imageElements), &imageElements))
-        || !d_ocl::utils::check_run("clSetKernelArg",
-                             clSetKernelArg(kernel->openclObject,
-                                            2,
-                                            sizeof(cl_mem),
-                                            &deviceHistogram->openclObject))) {
+        || !d_ocl::utils::check_run(
+            "clSetKernelArg",
+            clSetKernelArg(kernel->openclObject,
+                           2,
+                           sizeof(cl_mem),
+                           &deviceHistogram->openclObject))) {
         std::cerr << "error creating program kernel" << std::endl;
         return false;
     }
@@ -160,26 +163,28 @@ auto histogram_4_2() -> bool
     cl_event kernel_event;
     // queue the kernel onto the device
     // read the answer into host buffer after kernel is finished
-    if (!d_ocl::utils::check_run("clEnqueueNDRangeKernel",
-                          clEnqueueNDRangeKernel(palette.cmdQueue->openclObject,
-                                                 kernel->openclObject,
-                                                 1,
-                                                 nullptr,
-                                                 &globalSize,
-                                                 &workGroupSize,
-                                                 0,
-                                                 nullptr,
-                                                 &kernel_event))
-        || !d_ocl::utils::check_run("clEnqueueReadBuffer",
-                             clEnqueueReadBuffer(palette.cmdQueue->openclObject,
-                                                 deviceHistogram->openclObject,
-                                                 CL_TRUE,
-                                                 0,
-                                                 histogramSize,
-                                                 hostHistogram.data(),
-                                                 1,
-                                                 &kernel_event,
-                                                 nullptr))) {
+    if (!d_ocl::utils::check_run(
+            "clEnqueueNDRangeKernel",
+            clEnqueueNDRangeKernel(palette.cmdQueue->openclObject,
+                                   kernel->openclObject,
+                                   1,
+                                   nullptr,
+                                   &globalSize,
+                                   &workGroupSize,
+                                   0,
+                                   nullptr,
+                                   &kernel_event))
+        || !d_ocl::utils::check_run(
+            "clEnqueueReadBuffer",
+            clEnqueueReadBuffer(palette.cmdQueue->openclObject,
+                                deviceHistogram->openclObject,
+                                CL_TRUE,
+                                0,
+                                histogramSize,
+                                hostHistogram.data(),
+                                1,
+                                &kernel_event,
+                                nullptr))) {
         return false;
     }
 

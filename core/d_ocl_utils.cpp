@@ -1,9 +1,11 @@
 #include "d_ocl_utils.h"
 #include <iostream>
+#include <limits>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
 
-auto d_ocl::utils::check_run(const std::string& funcName, cl_int funcRetval) -> bool
+auto d_ocl::utils::check_run(const std::string& funcName, cl_int funcRetval)
+    -> bool
 {
     if (funcRetval == CL_SUCCESS) {
         return true;
@@ -32,12 +34,59 @@ auto d_ocl::utils::toRgba(const cv::Mat* bgraMat, cv::Mat* rgbaMat) -> bool
     return true;
 }
 
+auto d_ocl::utils::toFloat(const cv::Mat* intMat, cv::Mat* floatMat) -> bool
+{
+    double scale = 1;
+    double offset = 0;
+
+    // input * scale + offset -> output
+
+    switch (intMat->depth()) {
+    case CV_8S:
+        // -128 -> -0.5
+        scale = 1.0 / (1 << 8);
+        // -0.5 -> 0
+        offset = 0.5;
+        break;
+    case CV_8U:
+        // 255 -> 1.0
+        scale = 1.0 / std::numeric_limits<uint8_t>::max();
+        break;
+    case CV_16S:
+        scale = 1.0 / (1 << 16);
+        offset = 0.5;
+        break;
+    case CV_16U:
+        scale = 1.0 / std::numeric_limits<uint16_t>::max();
+        break;
+    case CV_32S:
+        scale = 1.0 / ((int64_t)1 << 32);
+        offset = 0.5;
+        break;
+    case CV_16F:
+    case CV_64F:
+        // just * 1.0
+        break;
+    case CV_32F:
+        // nothing to do
+        *floatMat = *intMat;
+        return true;
+    default:
+        std::cerr << "unrecognized cv::Mat::depth() -> " << intMat->depth()
+                  << " for input image to " << __FUNCTION__ << std::endl;
+    }
+
+    intMat->convertTo(
+        *floatMat, CV_MAKETYPE(CV_32F, intMat->channels()), scale, offset);
+    return true;
+}
+
 // wrapper around clGetDeviceInfo()
 template<typename T>
 auto d_ocl::utils::information(cl_device_id device,
-                        cl_device_info param_name,
-                        std::vector<T>& param_value,
-                        T default_value) -> bool
+                               cl_device_info param_name,
+                               std::vector<T>& param_value,
+                               T default_value) -> bool
 {
     // first find out value string length
     size_t requiredSize = 0;
