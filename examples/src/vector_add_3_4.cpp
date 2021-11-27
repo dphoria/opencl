@@ -42,8 +42,8 @@ auto vector_add_3_4() -> bool
 
     // device-side memory
     // initialize with data from host-side vector
-    std::shared_ptr<d_ocl::manager<cl_mem>> deviceA
-        = d_ocl::manager<cl_mem>::makeShared(
+    std::shared_ptr<d_ocl::utils::manager<cl_mem>> deviceA
+        = d_ocl::utils::manager<cl_mem>::makeShared(
             clCreateBuffer(palette.context->openclObject,
                            CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY
                                | CL_MEM_COPY_HOST_PTR,
@@ -51,8 +51,8 @@ auto vector_add_3_4() -> bool
                            hostA.data(),
                            nullptr),
             &clReleaseMemObject);
-    std::shared_ptr<d_ocl::manager<cl_mem>> deviceB
-        = d_ocl::manager<cl_mem>::makeShared(
+    std::shared_ptr<d_ocl::utils::manager<cl_mem>> deviceB
+        = d_ocl::utils::manager<cl_mem>::makeShared(
             clCreateBuffer(palette.context->openclObject,
                            CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY
                                | CL_MEM_COPY_HOST_PTR,
@@ -61,8 +61,8 @@ auto vector_add_3_4() -> bool
                            nullptr),
             &clReleaseMemObject);
     // to get answer from device to host accessible memory
-    std::shared_ptr<d_ocl::manager<cl_mem>> deviceC
-        = d_ocl::manager<cl_mem>::makeShared(
+    std::shared_ptr<d_ocl::utils::manager<cl_mem>> deviceC
+        = d_ocl::utils::manager<cl_mem>::makeShared(
             clCreateBuffer(palette.context->openclObject,
                            CL_MEM_WRITE_ONLY | CL_MEM_HOST_READ_ONLY,
                            dataSize,
@@ -75,14 +75,14 @@ auto vector_add_3_4() -> bool
     }
 
     // compile and link the program
-    std::shared_ptr<d_ocl::manager<cl_program>> program = d_ocl::createProgram(
+    std::shared_ptr<d_ocl::utils::manager<cl_program>> program = d_ocl::createProgram(
         palette.context->openclObject,
         EX_RESOURCE_ROOT "/" EX_NAME_VECTOR_ADD_3_4 "." D_OCL_KERN_EXT);
 
-    std::shared_ptr<d_ocl::manager<cl_kernel>> kernel;
+    std::shared_ptr<d_ocl::utils::manager<cl_kernel>> kernel;
     if (program) {
         // make a kernel out of the program
-        kernel = d_ocl::manager<cl_kernel>::makeShared(
+        kernel = d_ocl::utils::manager<cl_kernel>::makeShared(
             // specify the kernel name, decorated with __kernel in the source
             clCreateKernel(
                 program->openclObject, EX_NAME_VECTOR_ADD_3_4, nullptr),
@@ -93,17 +93,17 @@ auto vector_add_3_4() -> bool
         || !kernel
         // arguments for
         // vector_add(__global int* A, __global int* B, __global int* C)
-        || !d_ocl::check_run("clSetKernelArg",
+        || !d_ocl::utils::check_run("clSetKernelArg",
                              clSetKernelArg(kernel->openclObject,
                                             0,
                                             sizeof(cl_mem),
                                             &deviceA->openclObject))
-        || !d_ocl::check_run("clSetKernelArg",
+        || !d_ocl::utils::check_run("clSetKernelArg",
                              clSetKernelArg(kernel->openclObject,
                                             1,
                                             sizeof(cl_mem),
                                             &deviceB->openclObject))
-        || !d_ocl::check_run("clSetKernelArg",
+        || !d_ocl::utils::check_run("clSetKernelArg",
                              clSetKernelArg(kernel->openclObject,
                                             2,
                                             sizeof(cl_mem),
@@ -115,7 +115,7 @@ auto vector_add_3_4() -> bool
     cl_event kernel_event;
     // queue the kernel onto the device
     // read the answer into host buffer after kernel is finished
-    if (!d_ocl::check_run("clEnqueueNDRangeKernel",
+    if (!d_ocl::utils::check_run("clEnqueueNDRangeKernel",
                           clEnqueueNDRangeKernel(palette.cmdQueue->openclObject,
                                                  kernel->openclObject,
                                                  1,
@@ -125,7 +125,7 @@ auto vector_add_3_4() -> bool
                                                  0,
                                                  nullptr,
                                                  &kernel_event))
-        || !d_ocl::check_run("clEnqueueReadBuffer",
+        || !d_ocl::utils::check_run("clEnqueueReadBuffer",
                              clEnqueueReadBuffer(palette.cmdQueue->openclObject,
                                                  deviceC->openclObject,
                                                  CL_TRUE,

@@ -1,6 +1,8 @@
 set(SOURCES
     d_ocl.cpp
     d_ocl.h
+    d_ocl_utils.cpp
+    d_ocl_utils.h
     d_ocl_defines.h
 )
 add_library(d-ocl-core SHARED ${SOURCES})

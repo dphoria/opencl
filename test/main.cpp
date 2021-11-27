@@ -18,7 +18,7 @@ auto main(int argc, char** argv) -> int
             std::cout << "----" << std::endl
                       << "device " << i << ":" << std::endl
                       << "----" << std::endl
-                      << d_ocl::description(iter.second[i]) << std::endl;
+                      << d_ocl::utils::description(iter.second[i]) << std::endl;
         }
     }
 

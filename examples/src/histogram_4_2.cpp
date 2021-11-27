@@ -41,8 +41,8 @@ auto histogram_4_2() -> bool
 
     // buffer object for the input image
     // initialized with pixel data from bmp
-    std::shared_ptr<d_ocl::manager<cl_mem>> deviceImg
-        = d_ocl::manager<cl_mem>::makeShared(
+    std::shared_ptr<d_ocl::utils::manager<cl_mem>> deviceImg
+        = d_ocl::utils::manager<cl_mem>::makeShared(
             clCreateBuffer(palette.context->openclObject,
                            CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY
                                | CL_MEM_COPY_HOST_PTR,
@@ -51,8 +51,8 @@ auto histogram_4_2() -> bool
                            nullptr),
             &clReleaseMemObject);
     // to get histogram from device to host accessible memory
-    std::shared_ptr<d_ocl::manager<cl_mem>> deviceHistogram
-        = d_ocl::manager<cl_mem>::makeShared(
+    std::shared_ptr<d_ocl::utils::manager<cl_mem>> deviceHistogram
+        = d_ocl::utils::manager<cl_mem>::makeShared(
             clCreateBuffer(palette.context->openclObject,
                            CL_MEM_WRITE_ONLY | CL_MEM_HOST_READ_ONLY,
                            histogramSize,
@@ -68,7 +68,7 @@ auto histogram_4_2() -> bool
     // initialize the output histogram with zeros
     const int zero = 0;
     cl_event histogramInitialized;
-    if (!d_ocl::check_run("clEnqueueFillBuffer",
+    if (!d_ocl::utils::check_run("clEnqueueFillBuffer",
                           clEnqueueFillBuffer(palette.cmdQueue->openclObject,
                                               deviceHistogram->openclObject,
                                               &zero,
@@ -82,14 +82,14 @@ auto histogram_4_2() -> bool
     }
 
     // compile and link the program
-    std::shared_ptr<d_ocl::manager<cl_program>> program = d_ocl::createProgram(
+    std::shared_ptr<d_ocl::utils::manager<cl_program>> program = d_ocl::createProgram(
         palette.context->openclObject,
         EX_RESOURCE_ROOT "/" EX_NAME_HISTOGRAM_4_2 "." D_OCL_KERN_EXT);
 
-    std::shared_ptr<d_ocl::manager<cl_kernel>> kernel;
+    std::shared_ptr<d_ocl::utils::manager<cl_kernel>> kernel;
     if (program) {
         // make a kernel out of the program
-        kernel = d_ocl::manager<cl_kernel>::makeShared(
+        kernel = d_ocl::utils::manager<cl_kernel>::makeShared(
             // specify the kernel name, decorated with __kernel in the source
             clCreateKernel(
                 program->openclObject, EX_NAME_HISTOGRAM_4_2, nullptr),
@@ -102,16 +102,16 @@ auto histogram_4_2() -> bool
         // histogram_4_2(
         //     __global unsigned char* data, int numData, __global int*
         //     histogram)
-        || !d_ocl::check_run("clSetKernelArg",
+        || !d_ocl::utils::check_run("clSetKernelArg",
                              clSetKernelArg(kernel->openclObject,
                                             0,
                                             sizeof(cl_mem),
                                             &deviceImg->openclObject))
-        || !d_ocl::check_run(
+        || !d_ocl::utils::check_run(
             "clSetKernelArg",
             clSetKernelArg(
                 kernel->openclObject, 1, sizeof(imageElements), &imageElements))
-        || !d_ocl::check_run("clSetKernelArg",
+        || !d_ocl::utils::check_run("clSetKernelArg",
                              clSetKernelArg(kernel->openclObject,
                                             2,
                                             sizeof(cl_mem),
@@ -133,11 +133,11 @@ auto histogram_4_2() -> bool
     // # parallel compute units
     // keep in mind a work-group executes on a single compute unit
     std::vector<cl_uint> numComputeUnits;
-    if (!d_ocl::information<cl_uint>(
+    if (!d_ocl::utils::information<cl_uint>(
             device, CL_DEVICE_MAX_WORK_GROUP_SIZE, maxWorkGroupSize, 0)
-        || !d_ocl::information<cl_uint>(
+        || !d_ocl::utils::information<cl_uint>(
             device, CL_DEVICE_MAX_WORK_ITEM_SIZES, maxWorkItemsByDim, 0)
-        || !d_ocl::information<cl_uint>(
+        || !d_ocl::utils::information<cl_uint>(
             device, CL_DEVICE_MAX_COMPUTE_UNITS, numComputeUnits, 0)) {
         std::cerr << "could not calculate appropriate execution topology"
                   << std::endl;
@@ -160,7 +160,7 @@ auto histogram_4_2() -> bool
     cl_event kernel_event;
     // queue the kernel onto the device
     // read the answer into host buffer after kernel is finished
-    if (!d_ocl::check_run("clEnqueueNDRangeKernel",
+    if (!d_ocl::utils::check_run("clEnqueueNDRangeKernel",
                           clEnqueueNDRangeKernel(palette.cmdQueue->openclObject,
                                                  kernel->openclObject,
                                                  1,
@@ -170,7 +170,7 @@ auto histogram_4_2() -> bool
                                                  0,
                                                  nullptr,
                                                  &kernel_event))
-        || !d_ocl::check_run("clEnqueueReadBuffer",
+        || !d_ocl::utils::check_run("clEnqueueReadBuffer",
                              clEnqueueReadBuffer(palette.cmdQueue->openclObject,
                                                  deviceHistogram->openclObject,
                                                  CL_TRUE,
