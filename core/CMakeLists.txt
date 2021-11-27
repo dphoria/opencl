@@ -5,8 +5,11 @@ set(SOURCES
 )
 add_library(d-ocl-core SHARED ${SOURCES})
 
+include_directories("${OpenCV_INCLUDE_DIRS}")
+
 target_link_libraries(d-ocl-core
     ${OpenCL_LIBRARIES}
+    ${OpenCV_LIBS}
 )
 target_compile_definitions(d-ocl-core
     PRIVATE EXPORT_D_OCL_CORE

@@ -3,7 +3,7 @@
         {
             "label": "build",
             "type": "shell",
-            "command": "cmake --build ${command:cmake.buildDirectory} --target ${command:cmake.launchTargetFilename}",
+            "command": "cmake --build ${command:cmake.buildDirectory} --target ${command:cmake.getLaunchTargetFilename}",
             "group": {
                 "kind": "build",
                 "isDefault": true

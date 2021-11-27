@@ -1,5 +1,3 @@
-find_package(OpenCV 4.2 REQUIRED imgcodecs)
-
 # kernel source files here
 add_compile_definitions(EX_RESOURCE_ROOT="${CMAKE_CURRENT_SOURCE_DIR}/res")
 set(SOURCES
