@@ -42,7 +42,7 @@ struct manager
     ~manager()
     {
         if (openclObject != nullptr && releaseFunc != nullptr) {
-            releaseFunc(openclObject);
+            (*releaseFunc)(openclObject);
         }
     }
 
