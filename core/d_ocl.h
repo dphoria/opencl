@@ -35,7 +35,6 @@ struct D_OCL_API basic_palette
     std::shared_ptr<d_ocl::utils::manager<cl_command_queue>> cmdQueue;
 };
 // convenience func to create context and command queue for the first gpu device
-// found
 auto D_OCL_API createBasicPalette(basic_palette& palette) -> bool;
 
 // read kernel source from filePath to create cl_program
@@ -45,10 +44,14 @@ auto D_OCL_API createProgram(cl_context context, const std::string& filePath)
 
 // read image at filePath and initialize device-side image object with the input
 // image. opencvMat will be set to the loaded image if not null.
-auto D_OCL_API createInputImage(cl_context context,
-                                cl_mem_flags flags,
-                                const std::string& filePath,
-                                cv::Mat* opencvMat = nullptr)
+auto D_OCL_API
+createInputImage(cl_context context,
+                 cl_mem_flags flags,
+                 const std::string& filePath,
+                 // pass converters like toRgba to apply on the input cv::Mat
+                 // before setting up cl_mem
+                 const std::vector<d_ocl::utils::mat_convert_func>& matConverts,
+                 cv::Mat* opencvMat = nullptr)
     -> std::shared_ptr<d_ocl::utils::manager<cl_mem>>;
 // create device-side output buffer for image with same specification
 // (resolution, etc.) as opencvMat

@@ -22,7 +22,7 @@ auto d_ocl::utils::toRgba(const cv::Mat* bgraMat, cv::Mat* rgbaMat) -> bool
 
     // change channel order from opencv default bgra to common rgba
     if (rgbaMat->channels() == 3) {
-        conversionCode = cv::COLOR_BGR2RGB;
+        conversionCode = cv::COLOR_BGR2RGBA;
     } else if (rgbaMat->channels() == 4) {
         conversionCode = cv::COLOR_BGRA2RGBA;
     } else {
@@ -34,14 +34,14 @@ auto d_ocl::utils::toRgba(const cv::Mat* bgraMat, cv::Mat* rgbaMat) -> bool
     return true;
 }
 
-auto d_ocl::utils::toFloat(const cv::Mat* intMat, cv::Mat* floatMat) -> bool
+auto d_ocl::utils::toFloat(const cv::Mat* inMat, cv::Mat* floatMat) -> bool
 {
     double scale = 1;
     double offset = 0;
 
     // input * scale + offset -> output
 
-    switch (intMat->depth()) {
+    switch (inMat->depth()) {
     case CV_8S:
         // -128 -> -0.5
         scale = 1.0 / (1 << 8);
@@ -69,15 +69,15 @@ auto d_ocl::utils::toFloat(const cv::Mat* intMat, cv::Mat* floatMat) -> bool
         break;
     case CV_32F:
         // nothing to do
-        *floatMat = *intMat;
+        *floatMat = *inMat;
         return true;
     default:
-        std::cerr << "unrecognized cv::Mat::depth() -> " << intMat->depth()
+        std::cerr << "unrecognized cv::Mat::depth() -> " << inMat->depth()
                   << " for input image to " << __FUNCTION__ << std::endl;
     }
 
-    intMat->convertTo(
-        *floatMat, CV_MAKETYPE(CV_32F, intMat->channels()), scale, offset);
+    inMat->convertTo(
+        *floatMat, CV_MAKETYPE(CV_32F, inMat->channels()), scale, offset);
     return true;
 }
 

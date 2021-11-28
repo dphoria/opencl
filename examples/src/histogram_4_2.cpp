@@ -1,5 +1,6 @@
 #include "histogram_4_2.h"
 #include "../../core/d_ocl.h"
+#include "programs_defines.h"
 #include <CL/cl.h>
 #include <iostream>
 #include <opencv2/imgcodecs.hpp>
@@ -14,8 +15,6 @@ auto histogram_4_2() -> bool
     // gpu context and command queue for the first gpu device found
     d_ocl::basic_palette palette;
     if (!d_ocl::createBasicPalette(palette)) {
-        std::cerr << "error creating gpu context and command queue"
-                  << std::endl;
         return false;
     }
 

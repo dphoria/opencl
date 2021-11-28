@@ -13,8 +13,6 @@ auto vector_add_3_4() -> bool
     // gpu context and command queue for the first gpu device found
     d_ocl::basic_palette palette;
     if (!d_ocl::createBasicPalette(palette)) {
-        std::cerr << "error creating gpu context and command queue"
-                  << std::endl;
         return false;
     }
 

@@ -213,7 +213,6 @@ auto d_ocl::createProgram(cl_context context, const std::string& filePath)
     return program;
 }
 
-// expecting mat to be in rgba order if not single channel
 auto getImageFormat(const cv::Mat& mat, cl_image_format& imageFormat) -> bool
 {
     cl_channel_type channelType;
@@ -287,30 +286,36 @@ auto getImageDescription(const cv::Mat& mat, cl_image_desc& description) -> bool
     return true;
 }
 
-auto d_ocl::createInputImage(cl_context context,
-                             cl_mem_flags flags,
-                             const std::string& filePath,
-                             cv::Mat* opencvMat /*= nullptr*/
-                             ) -> std::shared_ptr<d_ocl::utils::manager<cl_mem>>
+auto d_ocl::createInputImage(
+    cl_context context,
+    cl_mem_flags flags,
+    const std::string& filePath,
+    const std::vector<d_ocl::utils::mat_convert_func>& matConverts,
+    cv::Mat* opencvMat /*= nullptr*/
+    ) -> std::shared_ptr<d_ocl::utils::manager<cl_mem>>
 {
-    cv::Mat bgraMat = cv::imread(filePath);
-    if (bgraMat.empty()) {
+    cv::Mat srcMat = cv::imread(filePath);
+    if (srcMat.empty()) {
         std::cerr << "cv::imread(" << filePath << ") failed" << std::endl;
         return std::shared_ptr<d_ocl::utils::manager<cl_mem>>();
     }
 
-    cv::Mat rgbaMat;
+    cv::Mat finalMat = srcMat;
+    // apply apply requested conversions like bgra -> rgba
+    for (d_ocl::utils::mat_convert_func convertFunc : matConverts) {
+        (*convertFunc)(&srcMat, &finalMat);
+        srcMat = finalMat;
+    }
+
+    // now ready to map to opencl image meta data
     cl_image_format imageFormat;
     cl_image_desc imageDesc;
-    // opencv standard is bgr[a]; convert to rgb[a] before using the data
-    // to initialize the device-side image
-    if (!d_ocl::utils::toRgba(&bgraMat, &rgbaMat)
-        || !getImageFormat(rgbaMat, imageFormat)
-        || !getImageDescription(rgbaMat, imageDesc)) {
+    if (!getImageFormat(finalMat, imageFormat)
+        || !getImageDescription(finalMat, imageDesc)) {
         return std::shared_ptr<d_ocl::utils::manager<cl_mem>>();
     }
     // input image byte size per row
-    imageDesc.image_row_pitch = rgbaMat.step[0];
+    imageDesc.image_row_pitch = finalMat.step[0];
 
     cl_int status;
     std::shared_ptr<d_ocl::utils::manager<cl_mem>> image
@@ -320,15 +325,14 @@ auto d_ocl::createInputImage(cl_context context,
                           flags | CL_MEM_COPY_HOST_PTR,
                           &imageFormat,
                           &imageDesc,
-                          rgbaMat.data,
+                          finalMat.data,
                           &status),
             &clReleaseMemObject);
     if (!image || status != CL_SUCCESS) {
         std::cerr << "clCreateImage() for " << filePath << " failed: " << status
                   << std::endl;
     } else if (opencvMat != nullptr) {
-        // return the one that uses opencv-standard bgr[a] channel order
-        *opencvMat = bgraMat;
+        *opencvMat = finalMat;
     }
 
     return image;

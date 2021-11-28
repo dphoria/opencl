@@ -50,10 +50,13 @@ struct manager
     opencl_release_func releaseFunc{nullptr};
 };
 
-// change channel order from opencv-default bgr[a] to rgb[a]
+using mat_convert_func = bool (*)(const cv::Mat*, cv::Mat*);
+// change channel order from opencv-default bgra to rgba
+// rgbaMat will always be 1 or 4 channels.
+// rgb has more restrictions of compatible data type than rgba in opencl
 auto D_OCL_API toRgba(const cv::Mat* bgraMat, cv::Mat* rgbaMat) -> bool;
 // convert data depth to 32-bit float 0.0~1.0
-auto D_OCL_API toFloat(const cv::Mat* intMat, cv::Mat* floatMat) -> bool;
+auto D_OCL_API toFloat(const cv::Mat* inMat, cv::Mat* floatMat) -> bool;
 
 // wrapper around clGetDeviceInfo()
 // will query value count for param_name first then call param_value.resize()
