@@ -11,8 +11,8 @@
 auto vector_add_3_4() -> bool
 {
     // gpu context and command queue for the first gpu device found
-    d_ocl::basic_palette palette;
-    if (!d_ocl::createBasicPalette(palette)) {
+    d_ocl::context_set contextSet;
+    if (!d_ocl::createContextSet(contextSet)) {
         return false;
     }
 
@@ -42,7 +42,7 @@ auto vector_add_3_4() -> bool
     // initialize with data from host-side vector
     std::shared_ptr<d_ocl::utils::manager<cl_mem>> deviceA
         = d_ocl::utils::manager<cl_mem>::makeShared(
-            clCreateBuffer(palette.context->openclObject,
+            clCreateBuffer(contextSet.context->openclObject,
                            CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY
                                | CL_MEM_COPY_HOST_PTR,
                            dataSize,
@@ -51,7 +51,7 @@ auto vector_add_3_4() -> bool
             &clReleaseMemObject);
     std::shared_ptr<d_ocl::utils::manager<cl_mem>> deviceB
         = d_ocl::utils::manager<cl_mem>::makeShared(
-            clCreateBuffer(palette.context->openclObject,
+            clCreateBuffer(contextSet.context->openclObject,
                            CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY
                                | CL_MEM_COPY_HOST_PTR,
                            dataSize,
@@ -61,7 +61,7 @@ auto vector_add_3_4() -> bool
     // to get answer from device to host accessible memory
     std::shared_ptr<d_ocl::utils::manager<cl_mem>> deviceC
         = d_ocl::utils::manager<cl_mem>::makeShared(
-            clCreateBuffer(palette.context->openclObject,
+            clCreateBuffer(contextSet.context->openclObject,
                            CL_MEM_WRITE_ONLY | CL_MEM_HOST_READ_ONLY,
                            dataSize,
                            nullptr,
@@ -74,7 +74,7 @@ auto vector_add_3_4() -> bool
 
     // compile and link the program
     std::shared_ptr<d_ocl::utils::manager<cl_program>> program
-        = d_ocl::createProgram(palette.context->openclObject,
+        = d_ocl::createProgram(contextSet.context->openclObject,
                                EX_RESOURCE_ROOT "/" EX_NAME_VECTOR_ADD_3_4
                                                 "." D_OCL_KERN_EXT);
 
@@ -116,7 +116,7 @@ auto vector_add_3_4() -> bool
     // read the answer into host buffer after kernel is finished
     if (!d_ocl::utils::check_run(
             "clEnqueueNDRangeKernel",
-            clEnqueueNDRangeKernel(palette.cmdQueue->openclObject,
+            clEnqueueNDRangeKernel(contextSet.cmdQueue->openclObject,
                                    kernel->openclObject,
                                    1,
                                    nullptr,
@@ -127,7 +127,7 @@ auto vector_add_3_4() -> bool
                                    &kernel_event))
         || !d_ocl::utils::check_run(
             "clEnqueueReadBuffer",
-            clEnqueueReadBuffer(palette.cmdQueue->openclObject,
+            clEnqueueReadBuffer(contextSet.cmdQueue->openclObject,
                                 deviceC->openclObject,
                                 CL_TRUE,
                                 0,

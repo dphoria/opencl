@@ -117,7 +117,7 @@ auto d_ocl::createCmdQueue(cl_device_id device, cl_context context)
         &clReleaseCommandQueue);
 }
 
-auto d_ocl::createBasicPalette(basic_palette& palette) -> bool
+auto d_ocl::createContextSet(context_set& contextSet) -> bool
 {
     std::unordered_map<cl_platform_id, std::vector<cl_device_id>>
         platformDevices = gpuPlatformDevices();
@@ -145,8 +145,8 @@ auto d_ocl::createBasicPalette(basic_palette& palette) -> bool
         return false;
     }
 
-    palette.context = context;
-    palette.cmdQueue = cmdQueue;
+    contextSet.context = context;
+    contextSet.cmdQueue = cmdQueue;
     return true;
 }
 

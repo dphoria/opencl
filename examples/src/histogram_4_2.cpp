@@ -13,8 +13,8 @@
 auto histogram_4_2() -> bool
 {
     // gpu context and command queue for the first gpu device found
-    d_ocl::basic_palette palette;
-    if (!d_ocl::createBasicPalette(palette)) {
+    d_ocl::context_set contextSet;
+    if (!d_ocl::createContextSet(contextSet)) {
         return false;
     }
 
@@ -42,7 +42,7 @@ auto histogram_4_2() -> bool
     // initialized with pixel data from bmp
     std::shared_ptr<d_ocl::utils::manager<cl_mem>> deviceImg
         = d_ocl::utils::manager<cl_mem>::makeShared(
-            clCreateBuffer(palette.context->openclObject,
+            clCreateBuffer(contextSet.context->openclObject,
                            CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY
                                | CL_MEM_COPY_HOST_PTR,
                            imageSize,
@@ -52,7 +52,7 @@ auto histogram_4_2() -> bool
     // to get histogram from device to host accessible memory
     std::shared_ptr<d_ocl::utils::manager<cl_mem>> deviceHistogram
         = d_ocl::utils::manager<cl_mem>::makeShared(
-            clCreateBuffer(palette.context->openclObject,
+            clCreateBuffer(contextSet.context->openclObject,
                            CL_MEM_WRITE_ONLY | CL_MEM_HOST_READ_ONLY,
                            histogramSize,
                            nullptr,
@@ -69,7 +69,7 @@ auto histogram_4_2() -> bool
     cl_event histogramInitialized;
     if (!d_ocl::utils::check_run(
             "clEnqueueFillBuffer",
-            clEnqueueFillBuffer(palette.cmdQueue->openclObject,
+            clEnqueueFillBuffer(contextSet.cmdQueue->openclObject,
                                 deviceHistogram->openclObject,
                                 &zero,
                                 sizeof(zero),
@@ -83,7 +83,7 @@ auto histogram_4_2() -> bool
 
     // compile and link the program
     std::shared_ptr<d_ocl::utils::manager<cl_program>> program
-        = d_ocl::createProgram(palette.context->openclObject,
+        = d_ocl::createProgram(contextSet.context->openclObject,
                                EX_RESOURCE_ROOT "/" EX_NAME_HISTOGRAM_4_2
                                                 "." D_OCL_KERN_EXT);
 
@@ -125,7 +125,7 @@ auto histogram_4_2() -> bool
     std::unordered_map<cl_platform_id, std::vector<cl_device_id>>
         platformDevices = d_ocl::gpuPlatformDevices();
     const auto platformIter = platformDevices.cbegin();
-    // createBasicPalette() above just used the first gpu device for the context
+    // createContextSet() above just used the first gpu device for the context
     cl_device_id device = platformIter->second[0];
 
     // max # work-items per compute unit
@@ -164,7 +164,7 @@ auto histogram_4_2() -> bool
     // read the answer into host buffer after kernel is finished
     if (!d_ocl::utils::check_run(
             "clEnqueueNDRangeKernel",
-            clEnqueueNDRangeKernel(palette.cmdQueue->openclObject,
+            clEnqueueNDRangeKernel(contextSet.cmdQueue->openclObject,
                                    kernel->openclObject,
                                    1,
                                    nullptr,
@@ -175,7 +175,7 @@ auto histogram_4_2() -> bool
                                    &kernel_event))
         || !d_ocl::utils::check_run(
             "clEnqueueReadBuffer",
-            clEnqueueReadBuffer(palette.cmdQueue->openclObject,
+            clEnqueueReadBuffer(contextSet.cmdQueue->openclObject,
                                 deviceHistogram->openclObject,
                                 CL_TRUE,
                                 0,

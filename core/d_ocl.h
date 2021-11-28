@@ -29,13 +29,13 @@ auto D_OCL_API createContext(cl_platform_id platform,
 auto D_OCL_API createCmdQueue(cl_device_id device, cl_context context)
     -> std::shared_ptr<d_ocl::utils::manager<cl_command_queue>>;
 
-struct D_OCL_API basic_palette
+struct D_OCL_API context_set
 {
     std::shared_ptr<d_ocl::utils::manager<cl_context>> context;
     std::shared_ptr<d_ocl::utils::manager<cl_command_queue>> cmdQueue;
 };
 // convenience func to create context and command queue for the first gpu device
-auto D_OCL_API createBasicPalette(basic_palette& palette) -> bool;
+auto D_OCL_API createContextSet(context_set& contextSet) -> bool;
 
 // read kernel source from filePath to create cl_program
 // program will have been built (compile, link)

@@ -12,8 +12,8 @@
 auto image_rotation_4_5() -> bool
 {
     // gpu context and command queue for the first gpu device found
-    d_ocl::basic_palette palette;
-    if (!d_ocl::createBasicPalette(palette)) {
+    d_ocl::context_set contextSet;
+    if (!d_ocl::createContextSet(contextSet)) {
         return false;
     }
 
@@ -22,7 +22,7 @@ auto image_rotation_4_5() -> bool
     // read the input image with pixel datain 32-bit floats
     std::shared_ptr<d_ocl::utils::manager<cl_mem>> inputImage
         = d_ocl::createInputImage(
-            palette.context->openclObject,
+            contextSet.context->openclObject,
             CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY,
             inputImagePath,
             // the kernel expects pixel data in 32-bit floats
