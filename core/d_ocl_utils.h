@@ -24,27 +24,10 @@ struct manager
     using opencl_release_func = int (*)(T);
 
     static auto makeShared(T openclObject, opencl_release_func releaseFunc)
-        -> std::shared_ptr<manager<T>>
-    {
-        if (openclObject == nullptr) {
-            // operator bool will fail test
-            return std::shared_ptr<manager<T>>();
-        }
+        -> std::shared_ptr<manager<T>>;
 
-        return std::make_shared<manager<T>>(openclObject, releaseFunc);
-    }
-
-    manager(T openclObject, opencl_release_func releaseFunc)
-    {
-        this->openclObject = openclObject;
-        this->releaseFunc = releaseFunc;
-    }
-    ~manager()
-    {
-        if (openclObject != nullptr && releaseFunc != nullptr) {
-            (*releaseFunc)(openclObject);
-        }
-    }
+    manager(T openclObject, opencl_release_func releaseFunc);
+    ~manager();
 
     T openclObject{nullptr};
     opencl_release_func releaseFunc{nullptr};
@@ -70,4 +53,5 @@ auto D_OCL_API description(cl_device_id device) -> std::string;
 } // namespace utils
 } // namespace d_ocl
 
+#include "d_ocl_manager.cpp"
 #endif
