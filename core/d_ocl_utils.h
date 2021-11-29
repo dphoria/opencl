@@ -19,6 +19,11 @@ auto D_OCL_API errorString(cl_int code) -> std::string;
 // else print funcRetval and return false
 auto D_OCL_API check_run(const std::string& funcName, cl_int funcRetval)
     -> bool;
+// helper to return true if funcRetval == CL_SUCCESS
+// else print funcRetval and return false
+template<typename... Args>
+auto D_OCL_API checkRun(std::function<cl_int(Args...)> openclFunc,
+                        Args&&... args) -> bool;
 
 // ensure release when finished with open resource like cl_context
 template<typename T>
@@ -57,5 +62,5 @@ auto D_OCL_API description(cl_device_id device) -> std::string;
 } // namespace utils
 } // namespace d_ocl
 
-#include "d_ocl_manager.cpp"
+#include "d_ocl_template_impl.cpp"
 #endif

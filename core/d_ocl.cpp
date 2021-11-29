@@ -18,16 +18,23 @@ auto d_ocl::gpuPlatforms() -> std::vector<cl_platform_id>
 {
     // find available platform count first
     cl_uint numPlatforms;
-    if (!d_ocl::utils::check_run("clGetPlatformIDs",
-                                 clGetPlatformIDs(0, nullptr, &numPlatforms))) {
+    if (!d_ocl::utils::checkRun(
+            std::function<cl_int(cl_uint, cl_platform_id*, cl_uint*)>(
+                clGetPlatformIDs),
+            (cl_uint)0,
+            (cl_platform_id*)nullptr,
+            &numPlatforms)) {
         numPlatforms = 0;
     }
 
     std::vector<cl_platform_id> platforms(numPlatforms);
     if (numPlatforms == 0
-        || !d_ocl::utils::check_run(
-            "clGetPlatformIDs",
-            clGetPlatformIDs(numPlatforms, platforms.data(), nullptr))) {
+        || !d_ocl::utils::checkRun(
+            std::function<cl_int(cl_uint, cl_platform_id*, cl_uint*)>(
+                clGetPlatformIDs),
+            (cl_uint)numPlatforms,
+            (cl_platform_id*)platforms.data(),
+            (cl_uint*)nullptr)) {
         platforms.clear();
     }
 
@@ -37,21 +44,31 @@ auto d_ocl::gpuPlatforms() -> std::vector<cl_platform_id>
 auto d_ocl::gpuDevices(cl_platform_id platform) -> std::vector<cl_device_id>
 {
     cl_uint numDevices;
-    if (!d_ocl::utils::check_run(
-            "clGetDeviceIDs",
-            clGetDeviceIDs(
-                platform, CL_DEVICE_TYPE_GPU, 0, nullptr, &numDevices))) {
+    if (!utils::checkRun(std::function<cl_int(cl_platform_id,
+                                              cl_device_type,
+                                              cl_uint,
+                                              cl_device_id*,
+                                              cl_uint*)>(clGetDeviceIDs),
+                         (cl_platform_id)platform,
+                         (cl_device_type)CL_DEVICE_TYPE_GPU,
+                         (cl_uint)0,
+                         (cl_device_id*)nullptr,
+                         &numDevices)) {
         numDevices = 0;
     }
 
     std::vector<cl_device_id> devices(numDevices);
     if (numDevices == 0
-        || !d_ocl::utils::check_run("clGetDeviceIDs",
-                                    clGetDeviceIDs(platform,
-                                                   CL_DEVICE_TYPE_GPU,
-                                                   numDevices,
-                                                   devices.data(),
-                                                   nullptr))) {
+        || !utils::checkRun(std::function<cl_int(cl_platform_id,
+                                                 cl_device_type,
+                                                 cl_uint,
+                                                 cl_device_id*,
+                                                 cl_uint*)>(clGetDeviceIDs),
+                            (cl_platform_id)platform,
+                            (cl_device_type)CL_DEVICE_TYPE_GPU,
+                            (cl_uint)numDevices,
+                            (cl_device_id*)devices.data(),
+                            (cl_uint*)nullptr)) {
         devices.clear();
     }
 
