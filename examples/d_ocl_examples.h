@@ -1,6 +1,7 @@
 #ifndef D_OCL_EXAMPLES_DEFINES_H_
 #define D_OCL_EXAMPLES_DEFINES_H_
 
+#include <functional>
 #include <list>
 #include <string>
 
@@ -11,7 +12,7 @@
 #endif
 
 extern D_OCL_EXAMPLES_API std::list<std::string> g_exampleNames;
-using d_ocl_test_func = bool (*)();
+using d_ocl_test_func = std::function<bool()>;
 extern D_OCL_EXAMPLES_API std::list<d_ocl_test_func> g_exampleFunctions;
 
 #endif

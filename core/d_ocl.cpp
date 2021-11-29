@@ -303,7 +303,7 @@ auto d_ocl::createInputImage(
     cv::Mat finalMat = srcMat;
     // apply apply requested conversions like bgra -> rgba
     for (d_ocl::utils::mat_convert_func convertFunc : matConverts) {
-        (*convertFunc)(&srcMat, &finalMat);
+        convertFunc(&srcMat, &finalMat);
         srcMat = finalMat;
     }
 

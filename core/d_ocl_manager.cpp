@@ -1,5 +1,5 @@
 template<typename T>
-using opencl_release_func = int (*)(T);
+using opencl_release_func = cl_int (*)(T);
 
 template<typename T>
 auto d_ocl::utils::manager<T>::makeShared(T openclObject, opencl_release_func releaseFunc)
@@ -24,6 +24,6 @@ template<typename T>
 d_ocl::utils::manager<T>::~manager()
 {
     if (openclObject != nullptr && releaseFunc != nullptr) {
-        (*releaseFunc)(openclObject);
+        releaseFunc(openclObject);
     }
 }

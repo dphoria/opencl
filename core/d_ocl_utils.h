@@ -3,6 +3,7 @@
 
 #include "d_ocl_defines.h"
 #include <CL/cl.h>
+#include <functional>
 #include <vector>
 
 namespace cv {
@@ -11,6 +12,9 @@ struct Mat;
 
 namespace d_ocl {
 namespace utils {
+// return string representation for code
+// e.g. CL_DEVICE_NOT_FOUND -> "CL_DEVICE_NOT_FOUND"
+auto D_OCL_API errorString(cl_int code) -> std::string;
 // helper to return true if funcRetval == CL_SUCCESS
 // else print funcRetval and return false
 auto D_OCL_API check_run(const std::string& funcName, cl_int funcRetval)
@@ -21,7 +25,7 @@ template<typename T>
 struct manager
 {
     // e.g. clReleaseContext
-    using opencl_release_func = int (*)(T);
+    using opencl_release_func = std::function<cl_int(T)>;
 
     static auto makeShared(T openclObject, opencl_release_func releaseFunc)
         -> std::shared_ptr<manager<T>>;
@@ -33,7 +37,7 @@ struct manager
     opencl_release_func releaseFunc{nullptr};
 };
 
-using mat_convert_func = bool (*)(const cv::Mat*, cv::Mat*);
+using mat_convert_func = std::function<bool(const cv::Mat*, cv::Mat*)>;
 // change channel order from opencv-default bgra to rgba
 // rgbaMat will always be 1 or 4 channels.
 // rgb has more restrictions of compatible data type than rgba in opencl
