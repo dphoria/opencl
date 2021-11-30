@@ -239,27 +239,18 @@ auto d_ocl::utils::information(cl_device_id device,
     // first find out value string length
     size_t requiredSize = 0;
     // requiredSize will be set to value string length
-    if (!checkRun(std::function<cl_int(
-                      cl_device_id, cl_device_info, size_t, void*, size_t*)>(
-                      clGetDeviceInfo),
-                  (cl_device_id)device,
-                  (cl_device_info)param_name,
-                  (size_t)0,
-                  (void*)nullptr,
-                  &requiredSize)) {
+    if (!check_run(
+            "clGetDeviceInfo",
+            clGetDeviceInfo(device, param_name, 0, nullptr, &requiredSize))) {
         return false;
     }
 
     // add 1 for safety, like null-termination
     param_value.resize(requiredSize + 1, default_value);
-    return checkRun(std::function<cl_int(
-                        cl_device_id, cl_device_info, size_t, void*, size_t*)>(
-                        clGetDeviceInfo),
-                    (cl_device_id)device,
-                    (cl_device_info)param_name,
-                    (size_t)requiredSize,
-                    (void*)param_value.data(),
-                    (size_t*)nullptr);
+    return check_run(
+        "clGetDeviceInfo",
+        clGetDeviceInfo(
+            device, param_name, requiredSize, param_value.data(), nullptr));
 };
 
 auto d_ocl::utils::description(cl_device_id device) -> std::string

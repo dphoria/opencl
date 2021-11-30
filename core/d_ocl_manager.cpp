@@ -1,22 +1,5 @@
-#include <iostream>
-
-template<typename ... Args>
-auto d_ocl::utils::checkRun(std::function<cl_int(Args ...)> openclFunc, Args&& ... args) -> bool
-{
-    if (!openclFunc) {
-        std::cerr << "empty opencl api function passed into checkRun()" << std::endl;
-        return false;
-    }
-
-    cl_int status = openclFunc(std::forward<Args>(args) ...);
-    if (status != CL_SUCCESS) {
-        // some_function() -> CL_SOME_ERROR(-n)
-        std::cerr << openclFunc.target_type().name() << "() -> " << errorString(status) << "(" << status << ")" << std::endl;
-        return false;
-    }
-
-    return true;
-}
+template<typename T>
+using opencl_release_func = cl_int (*)(T);
 
 template<typename T>
 auto d_ocl::utils::manager<T>::makeShared(T openclObject, opencl_release_func releaseFunc)
