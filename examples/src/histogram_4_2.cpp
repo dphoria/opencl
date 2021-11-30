@@ -67,7 +67,7 @@ auto histogram_4_2() -> bool
     // initialize the output histogram with zeros
     const int zero = 0;
     cl_event histogramInitialized;
-    if (!d_ocl::utils::check_run(
+    if (!d_ocl::utils::checkRun(
             "clEnqueueFillBuffer",
             clEnqueueFillBuffer(contextSet.cmdQueue->openclObject,
                                 deviceHistogram->openclObject,
@@ -103,16 +103,16 @@ auto histogram_4_2() -> bool
         // histogram_4_2(
         //     __global unsigned char* data, int numData, __global int*
         //     histogram)
-        || !d_ocl::utils::check_run("clSetKernelArg",
+        || !d_ocl::utils::checkRun("clSetKernelArg",
                                     clSetKernelArg(kernel->openclObject,
                                                    0,
                                                    sizeof(cl_mem),
                                                    &deviceImg->openclObject))
-        || !d_ocl::utils::check_run(
+        || !d_ocl::utils::checkRun(
             "clSetKernelArg",
             clSetKernelArg(
                 kernel->openclObject, 1, sizeof(imageElements), &imageElements))
-        || !d_ocl::utils::check_run(
+        || !d_ocl::utils::checkRun(
             "clSetKernelArg",
             clSetKernelArg(kernel->openclObject,
                            2,
@@ -162,7 +162,7 @@ auto histogram_4_2() -> bool
     cl_event kernel_event;
     // queue the kernel onto the device
     // read the answer into host buffer after kernel is finished
-    if (!d_ocl::utils::check_run(
+    if (!d_ocl::utils::checkRun(
             "clEnqueueNDRangeKernel",
             clEnqueueNDRangeKernel(contextSet.cmdQueue->openclObject,
                                    kernel->openclObject,
@@ -173,7 +173,7 @@ auto histogram_4_2() -> bool
                                    0,
                                    nullptr,
                                    &kernel_event))
-        || !d_ocl::utils::check_run(
+        || !d_ocl::utils::checkRun(
             "clEnqueueReadBuffer",
             clEnqueueReadBuffer(contextSet.cmdQueue->openclObject,
                                 deviceHistogram->openclObject,

@@ -17,7 +17,7 @@ namespace utils {
 auto D_OCL_API errorString(cl_int code) -> std::string;
 // helper to return true if funcRetval == CL_SUCCESS
 // else print funcRetval and return false
-auto D_OCL_API check_run(const std::string& funcName, cl_int funcRetval)
+auto D_OCL_API checkRun(const std::string& funcName, cl_int funcRetval)
     -> bool;
 
 // ensure release when finished with open resource like cl_context

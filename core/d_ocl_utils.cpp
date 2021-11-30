@@ -150,7 +150,7 @@ auto d_ocl::utils::errorString(cl_int code) -> std::string
     }
 }
 
-auto d_ocl::utils::check_run(const std::string& funcName, cl_int funcRetval)
+auto d_ocl::utils::checkRun(const std::string& funcName, cl_int funcRetval)
     -> bool
 {
     if (funcRetval == CL_SUCCESS) {
@@ -239,7 +239,7 @@ auto d_ocl::utils::information(cl_device_id device,
     // first find out value string length
     size_t requiredSize = 0;
     // requiredSize will be set to value string length
-    if (!check_run(
+    if (!checkRun(
             "clGetDeviceInfo",
             clGetDeviceInfo(device, param_name, 0, nullptr, &requiredSize))) {
         return false;
@@ -247,7 +247,7 @@ auto d_ocl::utils::information(cl_device_id device,
 
     // add 1 for safety, like null-termination
     param_value.resize(requiredSize + 1, default_value);
-    return check_run(
+    return checkRun(
         "clGetDeviceInfo",
         clGetDeviceInfo(
             device, param_name, requiredSize, param_value.data(), nullptr));

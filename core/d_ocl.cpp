@@ -18,14 +18,14 @@ auto d_ocl::gpuPlatforms() -> std::vector<cl_platform_id>
 {
     // find available platform count first
     cl_uint numPlatforms;
-    if (!d_ocl::utils::check_run("clGetPlatformIDs",
+    if (!utils::checkRun("clGetPlatformIDs",
                                  clGetPlatformIDs(0, nullptr, &numPlatforms))) {
         numPlatforms = 0;
     }
 
     std::vector<cl_platform_id> platforms(numPlatforms);
     if (numPlatforms == 0
-        || !d_ocl::utils::check_run(
+        || !utils::checkRun(
             "clGetPlatformIDs",
             clGetPlatformIDs(numPlatforms, platforms.data(), nullptr))) {
         platforms.clear();
@@ -37,7 +37,7 @@ auto d_ocl::gpuPlatforms() -> std::vector<cl_platform_id>
 auto d_ocl::gpuDevices(cl_platform_id platform) -> std::vector<cl_device_id>
 {
     cl_uint numDevices;
-    if (!d_ocl::utils::check_run(
+    if (!utils::checkRun(
             "clGetDeviceIDs",
             clGetDeviceIDs(
                 platform, CL_DEVICE_TYPE_GPU, 0, nullptr, &numDevices))) {
@@ -46,7 +46,7 @@ auto d_ocl::gpuDevices(cl_platform_id platform) -> std::vector<cl_device_id>
 
     std::vector<cl_device_id> devices(numDevices);
     if (numDevices == 0
-        || !d_ocl::utils::check_run("clGetDeviceIDs",
+        || !utils::checkRun("clGetDeviceIDs",
                                     clGetDeviceIDs(platform,
                                                    CL_DEVICE_TYPE_GPU,
                                                    numDevices,
@@ -88,7 +88,7 @@ auto handleError(const char* errinfo,
 
 auto d_ocl::createContext(cl_platform_id platform,
                           const std::vector<cl_device_id>& devices)
-    -> std::shared_ptr<d_ocl::utils::manager<cl_context>>
+    -> std::shared_ptr<utils::manager<cl_context>>
 {
     // list is terminated with 0. request to use this platform for the context
     std::vector<cl_context_properties> contextProperties
@@ -96,7 +96,7 @@ auto d_ocl::createContext(cl_platform_id platform,
            reinterpret_cast<cl_context_properties>(platform),
            0};
 
-    return d_ocl::utils::manager<cl_context>::makeShared(
+    return utils::manager<cl_context>::makeShared(
         clCreateContext(contextProperties.data(),
                         devices.size(),
                         devices.data(),
@@ -110,9 +110,9 @@ auto d_ocl::createContext(cl_platform_id platform,
 }
 
 auto d_ocl::createCmdQueue(cl_device_id device, cl_context context)
-    -> std::shared_ptr<d_ocl::utils::manager<cl_command_queue>>
+    -> std::shared_ptr<utils::manager<cl_command_queue>>
 {
-    return d_ocl::utils::manager<cl_command_queue>::makeShared(
+    return utils::manager<cl_command_queue>::makeShared(
         clCreateCommandQueueWithProperties(context, device, nullptr, nullptr),
         &clReleaseCommandQueue);
 }
@@ -130,7 +130,7 @@ auto d_ocl::createContextSet(context_set& contextSet) -> bool
     // just going to use the first one
     cl_device_id device = platformIter->second[0];
 
-    std::shared_ptr<d_ocl::utils::manager<cl_context>> context
+    std::shared_ptr<utils::manager<cl_context>> context
         = d_ocl::createContext(platformIter->first,
                                std::vector<cl_device_id>(1, device));
     if (!context) {
@@ -138,7 +138,7 @@ auto d_ocl::createContextSet(context_set& contextSet) -> bool
         return false;
     }
     // to communicate with device
-    std::shared_ptr<d_ocl::utils::manager<cl_command_queue>> cmdQueue
+    std::shared_ptr<utils::manager<cl_command_queue>> cmdQueue
         = d_ocl::createCmdQueue(device, context->openclObject);
     if (!cmdQueue) {
         std::cerr << "error creating gpu device cmd queue" << std::endl;
@@ -151,7 +151,7 @@ auto d_ocl::createContextSet(context_set& contextSet) -> bool
 }
 
 auto d_ocl::createProgram(cl_context context, const std::string& filePath)
-    -> std::shared_ptr<d_ocl::utils::manager<cl_program>>
+    -> std::shared_ptr<utils::manager<cl_program>>
 {
     // something really wrong if a single source file is more than 8 mb
     const size_t bufferSize = 1 << 23;
@@ -185,13 +185,13 @@ auto d_ocl::createProgram(cl_context context, const std::string& filePath)
         if (pos >= bufferSize) {
             std::cerr << filePath << " is more than " << bufferSize << " bytes"
                       << std::endl;
-            return d_ocl::utils::manager<cl_program>::makeShared(nullptr,
+            return utils::manager<cl_program>::makeShared(nullptr,
                                                                  nullptr);
         }
     }
 
-    std::shared_ptr<d_ocl::utils::manager<cl_program>> program
-        = d_ocl::utils::manager<cl_program>::makeShared(
+    std::shared_ptr<utils::manager<cl_program>> program
+        = utils::manager<cl_program>::makeShared(
             clCreateProgramWithSource(
                 context, lines.size(), lines.data(), lengths.data(), nullptr),
             &clReleaseProgram);
@@ -200,7 +200,7 @@ auto d_ocl::createProgram(cl_context context, const std::string& filePath)
     }
 
     // compile and link the program
-    if (!d_ocl::utils::check_run("clBuildProgram",
+    if (!utils::checkRun("clBuildProgram",
                                  clBuildProgram(program->openclObject,
                                                 0,
                                                 nullptr,
@@ -290,19 +290,19 @@ auto d_ocl::createInputImage(
     cl_context context,
     cl_mem_flags flags,
     const std::string& filePath,
-    const std::vector<d_ocl::utils::mat_convert_func>& matConverts,
+    const std::vector<utils::mat_convert_func>& matConverts,
     cv::Mat* opencvMat /*= nullptr*/
-    ) -> std::shared_ptr<d_ocl::utils::manager<cl_mem>>
+    ) -> std::shared_ptr<utils::manager<cl_mem>>
 {
     cv::Mat srcMat = cv::imread(filePath);
     if (srcMat.empty()) {
         std::cerr << "cv::imread(" << filePath << ") failed" << std::endl;
-        return std::shared_ptr<d_ocl::utils::manager<cl_mem>>();
+        return std::shared_ptr<utils::manager<cl_mem>>();
     }
 
     cv::Mat finalMat = srcMat;
     // apply apply requested conversions like bgra -> rgba
-    for (d_ocl::utils::mat_convert_func convertFunc : matConverts) {
+    for (utils::mat_convert_func convertFunc : matConverts) {
         convertFunc(&srcMat, &finalMat);
         srcMat = finalMat;
     }
@@ -312,14 +312,14 @@ auto d_ocl::createInputImage(
     cl_image_desc imageDesc;
     if (!getImageFormat(finalMat, imageFormat)
         || !getImageDescription(finalMat, imageDesc)) {
-        return std::shared_ptr<d_ocl::utils::manager<cl_mem>>();
+        return std::shared_ptr<utils::manager<cl_mem>>();
     }
     // input image byte size per row
     imageDesc.image_row_pitch = finalMat.step[0];
 
     cl_int status;
-    std::shared_ptr<d_ocl::utils::manager<cl_mem>> image
-        = d_ocl::utils::manager<cl_mem>::makeShared(
+    std::shared_ptr<utils::manager<cl_mem>> image
+        = utils::manager<cl_mem>::makeShared(
             // initialize the device-side buffer with the input image
             clCreateImage(context,
                           flags | CL_MEM_COPY_HOST_PTR,
@@ -341,18 +341,18 @@ auto d_ocl::createInputImage(
 auto d_ocl::createOutputImage(cl_context context,
                               cl_mem_flags flags,
                               const cv::Mat& opencvMat)
-    -> std::shared_ptr<d_ocl::utils::manager<cl_mem>>
+    -> std::shared_ptr<utils::manager<cl_mem>>
 {
     cl_image_format imageFormat;
     cl_image_desc imageDesc;
     if (!getImageFormat(opencvMat, imageFormat)
         || !getImageDescription(opencvMat, imageDesc)) {
-        return std::shared_ptr<d_ocl::utils::manager<cl_mem>>();
+        return std::shared_ptr<utils::manager<cl_mem>>();
     }
 
     cl_int status;
-    std::shared_ptr<d_ocl::utils::manager<cl_mem>> image
-        = d_ocl::utils::manager<cl_mem>::makeShared(
+    std::shared_ptr<utils::manager<cl_mem>> image
+        = utils::manager<cl_mem>::makeShared(
             clCreateImage(
                 context, flags, &imageFormat, &imageDesc, nullptr, &status),
             &clReleaseMemObject);

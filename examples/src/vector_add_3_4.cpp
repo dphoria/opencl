@@ -92,17 +92,17 @@ auto vector_add_3_4() -> bool
         || !kernel
         // arguments for
         // vector_add(__global int* A, __global int* B, __global int* C)
-        || !d_ocl::utils::check_run("clSetKernelArg",
+        || !d_ocl::utils::checkRun("clSetKernelArg",
                                     clSetKernelArg(kernel->openclObject,
                                                    0,
                                                    sizeof(cl_mem),
                                                    &deviceA->openclObject))
-        || !d_ocl::utils::check_run("clSetKernelArg",
+        || !d_ocl::utils::checkRun("clSetKernelArg",
                                     clSetKernelArg(kernel->openclObject,
                                                    1,
                                                    sizeof(cl_mem),
                                                    &deviceB->openclObject))
-        || !d_ocl::utils::check_run("clSetKernelArg",
+        || !d_ocl::utils::checkRun("clSetKernelArg",
                                     clSetKernelArg(kernel->openclObject,
                                                    2,
                                                    sizeof(cl_mem),
@@ -114,7 +114,7 @@ auto vector_add_3_4() -> bool
     cl_event kernel_event;
     // queue the kernel onto the device
     // read the answer into host buffer after kernel is finished
-    if (!d_ocl::utils::check_run(
+    if (!d_ocl::utils::checkRun(
             "clEnqueueNDRangeKernel",
             clEnqueueNDRangeKernel(contextSet.cmdQueue->openclObject,
                                    kernel->openclObject,
@@ -125,7 +125,7 @@ auto vector_add_3_4() -> bool
                                    0,
                                    nullptr,
                                    &kernel_event))
-        || !d_ocl::utils::check_run(
+        || !d_ocl::utils::checkRun(
             "clEnqueueReadBuffer",
             clEnqueueReadBuffer(contextSet.cmdQueue->openclObject,
                                 deviceC->openclObject,
