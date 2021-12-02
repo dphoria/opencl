@@ -104,10 +104,10 @@ auto histogram_4_2() -> bool
         //     __global unsigned char* data, int numData, __global int*
         //     histogram)
         || !d_ocl::utils::checkRun("clSetKernelArg",
-                                    clSetKernelArg(kernel->openclObject,
-                                                   0,
-                                                   sizeof(cl_mem),
-                                                   &deviceImg->openclObject))
+                                   clSetKernelArg(kernel->openclObject,
+                                                  0,
+                                                  sizeof(cl_mem),
+                                                  &deviceImg->openclObject))
         || !d_ocl::utils::checkRun(
             "clSetKernelArg",
             clSetKernelArg(

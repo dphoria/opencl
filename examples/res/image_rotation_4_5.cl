@@ -40,7 +40,7 @@ void rotation(
             float4 value = read_imagef(inputImage, sampler, readCoord);
 
             /* write to the globally unique pixel in the output image */
-            /* i.e. write pixel from original location in the rotated location */
+            /* i.e. copy pixel from original location to the rotated location */
             write_imagef(outputImage, (int2)(x, y), value);
         }
     }

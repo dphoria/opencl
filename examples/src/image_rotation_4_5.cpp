@@ -35,6 +35,69 @@ auto image_rotation_4_5() -> bool
         return false;
     }
 
+    // device-side buffer to get the rotated image
+    std::shared_ptr<d_ocl::utils::manager<cl_mem>> outputImage
+        = d_ocl::createOutputImage(
+            // rotated image will have same spec as input image,
+            // so tell the code to use inputMat to get properties like size
+            contextSet.context->openclObject,
+            CL_MEM_WRITE_ONLY | CL_MEM_HOST_READ_ONLY,
+            inputMat);
+    if (!outputImage) {
+        std::cerr << "error preparing output cl_mem " << std::endl;
+    }
+
+    std::shared_ptr<d_ocl::utils::manager<cl_program>> program
+        = d_ocl::createProgram(contextSet.context->openclObject,
+                               EX_RESOURCE_ROOT "/" EX_NAME_IMG_ROTATION_4_5
+                                                "." D_OCL_KERN_EXT);
+    if (!program) {
+        return false;
+    }
+    std::shared_ptr<d_ocl::utils::manager<cl_kernel>> kernel
+        = d_ocl::utils::manager<cl_kernel>::makeShared(
+            clCreateKernel(
+                program->openclObject, EX_NAME_IMG_ROTATION_4_5, nullptr),
+            clReleaseKernel);
+
+    // arbitrary image rotation angle
+    float theta = 45;
+    // set up args for
+    // void rotation(__read_only image2d_t inputImage,
+    //              __write_only image2d_t outputImage,
+    //                                 int imageWidth,
+    //                                 int imageHeight,
+    //                               float theta)
+    if (!kernel
+        || !d_ocl::utils::checkRun("clSetKernelArg",
+                                   clSetKernelArg(kernel->openclObject,
+                                                  0,
+                                                  sizeof(cl_mem),
+                                                  &inputImage->openclObject))
+        || !d_ocl::utils::checkRun("clSetKernelArg",
+                                   clSetKernelArg(kernel->openclObject,
+                                                  1,
+                                                  sizeof(cl_mem),
+                                                  &outputImage->openclObject))
+        || !d_ocl::utils::checkRun(
+            "clSetKernelArg",
+            clSetKernelArg(
+                kernel->openclObject, 2, sizeof(inputMat.cols), &inputMat.cols))
+        || !d_ocl::utils::checkRun(
+            "clSetKernelArg",
+            clSetKernelArg(
+                kernel->openclObject, 3, sizeof(inputMat.rows), &inputMat.rows))
+        || !d_ocl::utils::checkRun(
+            "clSetKernelArg",
+            clSetKernelArg(kernel->openclObject, 4, sizeof(theta), &theta))) {
+        std::cerr << "error creating and setting up kernel program"
+                  << std::endl;
+        return false;
+    }
+
+    // TODO: queue/execute the kernel, get the rotated image from outputImage
+    // and save to local disk file
+
     return true;
 }
 

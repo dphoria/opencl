@@ -93,20 +93,20 @@ auto vector_add_3_4() -> bool
         // arguments for
         // vector_add(__global int* A, __global int* B, __global int* C)
         || !d_ocl::utils::checkRun("clSetKernelArg",
-                                    clSetKernelArg(kernel->openclObject,
-                                                   0,
-                                                   sizeof(cl_mem),
-                                                   &deviceA->openclObject))
+                                   clSetKernelArg(kernel->openclObject,
+                                                  0,
+                                                  sizeof(cl_mem),
+                                                  &deviceA->openclObject))
         || !d_ocl::utils::checkRun("clSetKernelArg",
-                                    clSetKernelArg(kernel->openclObject,
-                                                   1,
-                                                   sizeof(cl_mem),
-                                                   &deviceB->openclObject))
+                                   clSetKernelArg(kernel->openclObject,
+                                                  1,
+                                                  sizeof(cl_mem),
+                                                  &deviceB->openclObject))
         || !d_ocl::utils::checkRun("clSetKernelArg",
-                                    clSetKernelArg(kernel->openclObject,
-                                                   2,
-                                                   sizeof(cl_mem),
-                                                   &deviceC->openclObject))) {
+                                   clSetKernelArg(kernel->openclObject,
+                                                  2,
+                                                  sizeof(cl_mem),
+                                                  &deviceC->openclObject))) {
         std::cerr << "error creating program kernel" << std::endl;
         return false;
     }

@@ -19,7 +19,7 @@ auto d_ocl::gpuPlatforms() -> std::vector<cl_platform_id>
     // find available platform count first
     cl_uint numPlatforms;
     if (!utils::checkRun("clGetPlatformIDs",
-                                 clGetPlatformIDs(0, nullptr, &numPlatforms))) {
+                         clGetPlatformIDs(0, nullptr, &numPlatforms))) {
         numPlatforms = 0;
     }
 
@@ -47,11 +47,11 @@ auto d_ocl::gpuDevices(cl_platform_id platform) -> std::vector<cl_device_id>
     std::vector<cl_device_id> devices(numDevices);
     if (numDevices == 0
         || !utils::checkRun("clGetDeviceIDs",
-                                    clGetDeviceIDs(platform,
-                                                   CL_DEVICE_TYPE_GPU,
-                                                   numDevices,
-                                                   devices.data(),
-                                                   nullptr))) {
+                            clGetDeviceIDs(platform,
+                                           CL_DEVICE_TYPE_GPU,
+                                           numDevices,
+                                           devices.data(),
+                                           nullptr))) {
         devices.clear();
     }
 
@@ -130,9 +130,8 @@ auto d_ocl::createContextSet(context_set& contextSet) -> bool
     // just going to use the first one
     cl_device_id device = platformIter->second[0];
 
-    std::shared_ptr<utils::manager<cl_context>> context
-        = d_ocl::createContext(platformIter->first,
-                               std::vector<cl_device_id>(1, device));
+    std::shared_ptr<utils::manager<cl_context>> context = d_ocl::createContext(
+        platformIter->first, std::vector<cl_device_id>(1, device));
     if (!context) {
         std::cerr << "error creating gpu device context" << std::endl;
         return false;
@@ -185,8 +184,7 @@ auto d_ocl::createProgram(cl_context context, const std::string& filePath)
         if (pos >= bufferSize) {
             std::cerr << filePath << " is more than " << bufferSize << " bytes"
                       << std::endl;
-            return utils::manager<cl_program>::makeShared(nullptr,
-                                                                 nullptr);
+            return utils::manager<cl_program>::makeShared(nullptr, nullptr);
         }
     }
 
@@ -201,12 +199,12 @@ auto d_ocl::createProgram(cl_context context, const std::string& filePath)
 
     // compile and link the program
     if (!utils::checkRun("clBuildProgram",
-                                 clBuildProgram(program->openclObject,
-                                                0,
-                                                nullptr,
-                                                nullptr,
-                                                nullptr,
-                                                nullptr))) {
+                         clBuildProgram(program->openclObject,
+                                        0,
+                                        nullptr,
+                                        nullptr,
+                                        nullptr,
+                                        nullptr))) {
         // clReleaseProgram if build failed
         program.reset();
     }

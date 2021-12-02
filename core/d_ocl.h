@@ -44,15 +44,14 @@ auto D_OCL_API createProgram(cl_context context, const std::string& filePath)
 
 // read image at filePath and initialize device-side image object with the input
 // image. opencvMat will be set to the loaded image if not null.
-auto D_OCL_API
-createInputImage(cl_context context,
-                 cl_mem_flags flags,
-                 const std::string& filePath,
-                 // pass converters like toRgba to apply on the input cv::Mat
-                 // before setting up cl_mem
-                 const std::vector<utils::mat_convert_func>& matConverts,
-                 cv::Mat* opencvMat = nullptr)
-    -> std::shared_ptr<utils::manager<cl_mem>>;
+auto D_OCL_API createInputImage(
+    cl_context context,
+    cl_mem_flags flags,
+    const std::string& filePath,
+    // pass converters like toRgba to apply on the input cv::Mat
+    // before setting up cl_mem
+    const std::vector<utils::mat_convert_func>& matConverts,
+    cv::Mat* opencvMat = nullptr) -> std::shared_ptr<utils::manager<cl_mem>>;
 // create device-side output buffer for image with same specification
 // (resolution, etc.) as opencvMat
 auto D_OCL_API createOutputImage(cl_context context,
