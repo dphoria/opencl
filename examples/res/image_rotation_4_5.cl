@@ -7,7 +7,7 @@ __constant sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE
                                | CLK_ADDRESS_CLAMP;
 
 __kernel 
-void rotation(
+void image_rotation_4_5(
     // expected to store data in 32-bit float
     __read_only image2d_t inputImage, 
    __write_only image2d_t outputImage,
