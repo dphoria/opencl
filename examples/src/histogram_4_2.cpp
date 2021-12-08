@@ -129,16 +129,11 @@ auto histogram_4_2() -> bool
     cl_device_id device = platformIter->second[0];
 
     // max # work-items per compute unit
-    std::vector<cl_uint> maxWorkGroupSize;
-    // max # work-items per dimension
-    std::vector<cl_uint> maxWorkItemsByDim;
+    std::vector<size_t> workGroupSize = d_ocl::utils::maxWorkGroupSize(device);
     // # parallel compute units
     // keep in mind a work-group executes on a single compute unit
     std::vector<cl_uint> numComputeUnits;
-    if (!d_ocl::utils::information<cl_uint>(
-            device, CL_DEVICE_MAX_WORK_GROUP_SIZE, maxWorkGroupSize, 0)
-        || !d_ocl::utils::information<cl_uint>(
-            device, CL_DEVICE_MAX_WORK_ITEM_SIZES, maxWorkItemsByDim, 0)
+    if (workGroupSize.empty()
         || !d_ocl::utils::information<cl_uint>(
             device, CL_DEVICE_MAX_COMPUTE_UNITS, numComputeUnits, 0)) {
         std::cerr << "could not calculate appropriate execution topology"
@@ -146,17 +141,16 @@ auto histogram_4_2() -> bool
         return false;
     }
 
-    size_t workGroupSize = std::min(maxWorkGroupSize[0], maxWorkItemsByDim[0]);
     // will read at most this many pixel data points concurrently
     // max # parallel compute units (work-groups)
     // * max # work-items in work-group
-    size_t globalSize = numComputeUnits[0] * workGroupSize;
+    size_t globalSize = numComputeUnits[0] * workGroupSize[0];
 
     std::cout << "input image: " << imageElements << " elements" << std::endl
               << "global size: " << globalSize << std::endl
               << "work-groups: "
-              << std::ceil((float)imageElements / workGroupSize) << std::endl
-              << "work-items per work-group (local size): " << workGroupSize
+              << std::ceil((float)imageElements / workGroupSize[0]) << std::endl
+              << "work-items per work-group (local size): " << workGroupSize[0]
               << std::endl;
 
     cl_event kernel_event;
@@ -169,7 +163,7 @@ auto histogram_4_2() -> bool
                                    1,
                                    nullptr,
                                    &globalSize,
-                                   &workGroupSize,
+                                   workGroupSize.data(),
                                    0,
                                    nullptr,
                                    &kernel_event))

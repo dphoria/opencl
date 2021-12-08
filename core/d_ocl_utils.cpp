@@ -297,3 +297,34 @@ auto d_ocl::utils::description(cl_device_id device) -> std::string
 
     return stream.str();
 }
+
+auto d_ocl::utils::maxWorkGroupSize(cl_device_id device) -> std::vector<size_t>
+{
+    // max # work-items per compute unit
+    std::vector<size_t> maxWorkGroupSize;
+    // max # work-items per dimension
+    std::vector<size_t> maxWorkItemsByDim;
+    // max dimensions
+    std::vector<cl_uint> maxDimensions;
+
+    if (!d_ocl::utils::information<size_t>(
+            device, CL_DEVICE_MAX_WORK_GROUP_SIZE, maxWorkGroupSize, 0)
+        || !d_ocl::utils::information<size_t>(
+            device, CL_DEVICE_MAX_WORK_ITEM_SIZES, maxWorkItemsByDim, 0)
+        || !d_ocl::utils::information<cl_uint>(
+            device, CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS, maxDimensions, 0)) {
+        std::cerr << "error querying CL_DEVICE_MAX_WORK_GROUP_SIZE, CL_DEVICE_MAX_WORK_ITEM_SIZES, CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS" << std::endl;
+        return std::vector<size_t>();
+    }
+
+    for (size_t& maxItems : maxWorkItemsByDim) {
+        if (maxItems > maxWorkGroupSize[0]) {
+            maxItems = maxWorkGroupSize[0];
+        }
+    }
+    if (maxWorkItemsByDim.size() > maxDimensions[0]) {
+        maxWorkItemsByDim.resize(maxDimensions[0]);
+    }
+
+    return maxWorkItemsByDim;
+}
