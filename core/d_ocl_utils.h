@@ -54,7 +54,10 @@ auto D_OCL_API information(cl_device_id device,
 // generate human-readable description
 auto D_OCL_API description(cl_device_id device) -> std::string;
 
-// convenience func for maximum possible # work-items in a work-group per dimension
+// max compute units = max work groups
+auto D_OCL_API maxComputeUnits(cl_device_id device) -> cl_uint;
+// convenience func for maximum possible # work-items in a work-group per
+// dimension
 auto D_OCL_API maxWorkGroupSize(cl_device_id device) -> std::vector<size_t>;
 } // namespace utils
 } // namespace d_ocl

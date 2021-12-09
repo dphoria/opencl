@@ -1,9 +1,9 @@
-                               // coordinates are [0...size), not [0...1]
+                               /* coordinates are [0...size), not [0...1] */
 __constant sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE
-                               // linear interpolation when reading from between pixels
-                               // can use because we will pass coordinates in float
+                               /* linear interpolation when reading from between pixels */
+                               /* can use because we will pass coordinates in float */
                                | CLK_FILTER_LINEAR
-                               // prevent reading from out-of-bound pixel
+                               /* prevent reading from out-of-bound pixel */
                                | CLK_ADDRESS_CLAMP;
 
 __kernel 

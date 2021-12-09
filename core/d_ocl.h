@@ -31,6 +31,7 @@ auto D_OCL_API createCmdQueue(cl_device_id device, cl_context context)
 
 struct D_OCL_API context_set
 {
+    cl_device_id device;
     std::shared_ptr<utils::manager<cl_context>> context;
     std::shared_ptr<utils::manager<cl_command_queue>> cmdQueue;
 };

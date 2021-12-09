@@ -144,6 +144,7 @@ auto d_ocl::createContextSet(context_set& contextSet) -> bool
         return false;
     }
 
+    contextSet.device = device;
     contextSet.context = context;
     contextSet.cmdQueue = cmdQueue;
     return true;
@@ -299,7 +300,7 @@ auto d_ocl::createInputImage(
     }
 
     cv::Mat finalMat = srcMat;
-    // apply apply requested conversions like bgra -> rgba
+    // apply requested conversions like bgra -> rgba
     for (utils::mat_convert_func convertFunc : matConverts) {
         convertFunc(&srcMat, &finalMat);
         srcMat = finalMat;
@@ -327,8 +328,9 @@ auto d_ocl::createInputImage(
                           &status),
             &clReleaseMemObject);
     if (!image || status != CL_SUCCESS) {
-        std::cerr << "clCreateImage() for " << filePath << " failed: " << status
-                  << std::endl;
+        std::cerr << "clCreateImage(" << filePath
+                  << ") failed: " << utils::errorString(status) << "(" << status
+                  << ")" << std::endl;
     } else if (opencvMat != nullptr) {
         *opencvMat = finalMat;
     }

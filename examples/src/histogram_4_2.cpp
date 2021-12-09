@@ -122,29 +122,20 @@ auto histogram_4_2() -> bool
         return false;
     }
 
-    std::unordered_map<cl_platform_id, std::vector<cl_device_id>>
-        platformDevices = d_ocl::gpuPlatformDevices();
-    const auto platformIter = platformDevices.cbegin();
-    // createContextSet() above just used the first gpu device for the context
-    cl_device_id device = platformIter->second[0];
-
     // max # work-items per compute unit
-    std::vector<size_t> workGroupSize = d_ocl::utils::maxWorkGroupSize(device);
+    std::vector<size_t> workGroupSize
+        = d_ocl::utils::maxWorkGroupSize(contextSet.device);
     // # parallel compute units
     // keep in mind a work-group executes on a single compute unit
-    std::vector<cl_uint> numComputeUnits;
-    if (workGroupSize.empty()
-        || !d_ocl::utils::information<cl_uint>(
-            device, CL_DEVICE_MAX_COMPUTE_UNITS, numComputeUnits, 0)) {
-        std::cerr << "could not calculate appropriate execution topology"
-                  << std::endl;
+    cl_uint numComputeUnits = d_ocl::utils::maxComputeUnits(contextSet.device);
+    if (numComputeUnits == 0) {
         return false;
     }
 
     // will read at most this many pixel data points concurrently
     // max # parallel compute units (work-groups)
     // * max # work-items in work-group
-    size_t globalSize = numComputeUnits[0] * workGroupSize[0];
+    size_t globalSize = numComputeUnits * workGroupSize[0];
 
     std::cout << "input image: " << imageElements << " elements" << std::endl
               << "global size: " << globalSize << std::endl

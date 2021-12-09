@@ -298,6 +298,20 @@ auto d_ocl::utils::description(cl_device_id device) -> std::string
     return stream.str();
 }
 
+auto d_ocl::utils::maxComputeUnits(cl_device_id device) -> cl_uint
+{
+    // # parallel compute units
+    // keep in mind a work-group executes on a single compute unit
+    std::vector<cl_uint> numComputeUnits;
+    if (!information<cl_uint>(
+            device, CL_DEVICE_MAX_COMPUTE_UNITS, numComputeUnits, 0)) {
+        std::cerr << "error quering CL_DEVICE_MAX_COMPUTE_UNITS" << std::endl;
+        return 0;
+    }
+
+    return numComputeUnits[0];
+}
+
 auto d_ocl::utils::maxWorkGroupSize(cl_device_id device) -> std::vector<size_t>
 {
     // max # work-items per compute unit
@@ -307,13 +321,16 @@ auto d_ocl::utils::maxWorkGroupSize(cl_device_id device) -> std::vector<size_t>
     // max dimensions
     std::vector<cl_uint> maxDimensions;
 
-    if (!d_ocl::utils::information<size_t>(
+    if (!information<size_t>(
             device, CL_DEVICE_MAX_WORK_GROUP_SIZE, maxWorkGroupSize, 0)
-        || !d_ocl::utils::information<size_t>(
+        || !information<size_t>(
             device, CL_DEVICE_MAX_WORK_ITEM_SIZES, maxWorkItemsByDim, 0)
-        || !d_ocl::utils::information<cl_uint>(
+        || !information<cl_uint>(
             device, CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS, maxDimensions, 0)) {
-        std::cerr << "error querying CL_DEVICE_MAX_WORK_GROUP_SIZE, CL_DEVICE_MAX_WORK_ITEM_SIZES, CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS" << std::endl;
+        std::cerr << "error querying CL_DEVICE_MAX_WORK_GROUP_SIZE, "
+                     "CL_DEVICE_MAX_WORK_ITEM_SIZES, "
+                     "CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS"
+                  << std::endl;
         return std::vector<size_t>();
     }
 
