@@ -45,6 +45,7 @@ auto D_OCL_API createProgram(cl_context context, const std::string& filePath)
 
 // read image at filePath and initialize device-side image object with the input
 // image. opencvMat will be set to the loaded image if not null.
+// CL_MEM_COPY_HOST_PTR will be bit-or'd to flags
 auto D_OCL_API createInputImage(
     cl_context context,
     cl_mem_flags flags,
