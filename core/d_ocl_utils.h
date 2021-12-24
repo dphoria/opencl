@@ -41,6 +41,7 @@ using mat_convert_func = std::function<bool(const cv::Mat*, cv::Mat*)>;
 // rgbaMat will always be 1 or 4 channels.
 // rgb has more restrictions of compatible data type than rgba in opencl
 auto D_OCL_API toRgba(const cv::Mat* bgraMat, cv::Mat* rgbaMat) -> bool;
+auto D_OCL_API toGreyscale(const cv::Mat* inMat, cv::Mat* greyMat) -> bool;
 // convert data depth to 32-bit float 0.0~1.0
 auto D_OCL_API toFloat(const cv::Mat* inMat, cv::Mat* floatMat) -> bool;
 

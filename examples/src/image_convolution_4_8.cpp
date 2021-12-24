@@ -24,14 +24,14 @@ auto image_convolution_4_8() -> bool
         return false;
     }
 
-    // read in the src image in rgba 32-bit float (format expected by kernel
+    // read in the src image in greyscale 32-bit float (format expected by kernel
     // program)
     cv::Mat inputMat;
     std::shared_ptr<d_ocl::utils::manager<cl_mem>> inputImage
         = d_ocl::createInputImage(contextSet.context->openclObject,
                                   CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY,
                                   EX_RESOURCE_ROOT "/cat.bmp",
-                                  {d_ocl::utils::toRgba, d_ocl::utils::toFloat},
+                                  {d_ocl::utils::toGreyscale, d_ocl::utils::toFloat},
                                   &inputMat);
     // deviec-side buffer for output image
     std::shared_ptr<d_ocl::utils::manager<cl_mem>> outputImage
@@ -177,18 +177,12 @@ auto image_convolution_4_8() -> bool
         return false;
     }
 
-    // outputMat is CV_32FC4 RGBA. convert to opencv native BGR (CV_32FC3)
-    // before calling cv::imwrite()
-    cv::Mat bgraMat = cv::Mat(outputMat.size(), outputMat.type());
-    cv::cvtColor(outputMat, bgraMat, cv::COLOR_RGBA2BGR);
-    if (!cv::imwrite(EX_NAME_IMG_CONVOLUTION_4_8 ".tiff", bgraMat)) {
+    if (!cv::imwrite(EX_NAME_IMG_CONVOLUTION_4_8 ".png", outputMat)) {
         std::cerr << "error saving filtered image to disk" << std::endl;
         return false;
     }
 
-    // TODO: filtering did not work; output image is not the expected blurred image
-    //       the filtering may need modifications to use just the first channel
-    std::cout << "filtered image saved in " EX_NAME_IMG_CONVOLUTION_4_8 ".tiff"
+    std::cout << "filtered image saved in " EX_NAME_IMG_CONVOLUTION_4_8 ".png"
               << std::endl;
 
     return true;

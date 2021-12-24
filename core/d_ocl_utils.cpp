@@ -182,6 +182,23 @@ auto d_ocl::utils::toRgba(const cv::Mat* bgraMat, cv::Mat* rgbaMat) -> bool
     return true;
 }
 
+auto d_ocl::utils::toGreyscale(const cv::Mat* inMat, cv::Mat* greyMat) -> bool
+{
+    *greyMat = *inMat;
+    int conversionCode;
+
+    if (inMat->channels() == 3) {
+        conversionCode = cv::COLOR_BGR2GRAY;
+    } else if (inMat->channels() == 4) {
+        conversionCode = cv::COLOR_BGRA2GRAY;
+    } else {
+        return true;
+    }
+
+    cv::cvtColor(*inMat, *greyMat, conversionCode);
+    return true;
+}
+
 auto d_ocl::utils::toFloat(const cv::Mat* inMat, cv::Mat* floatMat) -> bool
 {
     double scale = 1;

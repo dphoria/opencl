@@ -33,11 +33,7 @@ void image_convolution_4_8(
                     float4 pixel = read_imagef(inputImage, sampler, coords);
 
                     /* add filtered to the new pixel data */
-                    sum.x += pixel.x * filter[filterIdx];
-                    sum.y += pixel.y * filter[filterIdx];
-                    sum.z += pixel.z * filter[filterIdx];
-                    sum.w += pixel.w * filter[filterIdx];
-                    filterIdx++;
+                    sum.x += pixel.x * filter[filterIdx++];
                 }
             }
 

@@ -22,7 +22,6 @@
                 //    "ignoreFailures": true
                 //}
             ],
-            "preLaunchTask": "${defaultBuildTask}",
             "miDebuggerPath": "/usr/bin/gdb"
         }
     ]
